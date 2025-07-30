@@ -1,0 +1,88 @@
+erDiagram
+    User ||--o{ CouponIssue : has
+    User ||--o{ Order : places
+    User ||--|| Point : owns
+    Coupon ||--o{ CouponIssue : issues
+    Order ||--o{ OrderItem : contains
+    OrderItem ||--|| Product : references
+    Product ||--|| ProductStock : has
+    Point ||--o{ PointHistory : records
+    PointHistory ||--|| Payment : uses
+    Order ||--|| Payment : generates
+
+    User {
+        Long userId
+        String name
+    }
+
+    Coupon {
+        Long couponId
+        String name
+        DiscountType discountType
+        BigDecimal discountValue
+        LocalDateTime issueStartAt
+        LocalDateTime issueEndAt
+        Integer validityPeriod
+        Integer totalIssueQuantity
+        Integer issuedQuantity
+    }
+
+    CouponIssue {
+        Long couponIssueId
+        Long userId
+        Long couponId
+        LocalDateTime usedAt
+        LocalDateTime expiredAt
+    }
+
+    Order {
+        Long id
+        Long userId
+        Long couponId
+        OrderStatus status
+        String orderItemName
+        BigDecimal itemAmount
+        BigDecimal totalAmount
+        BigDecimal discountAmount
+        BigDecimal paymentAmount
+    }
+
+    OrderItem {
+        Long id
+        Long orderId
+        Long productId
+        String orderItemName
+        BigDecimal orderPrice
+        int quantity
+    }
+
+    Product {
+        Long id
+        String name
+        BigDecimal price
+    }
+
+    ProductStock {
+        Long id
+        Long productId
+        int quantity
+    }
+
+    Payment {
+        Long id
+        Long orderId
+        BigDecimal paymentAmount
+    }
+
+    Point {
+        Long pointId
+        Long userId
+        BigDecimal point
+    }
+
+    PointHistory {
+        Long pointHistoyId
+        Long pointId
+        Long paymentId
+        BigDecimal amount
+    }
