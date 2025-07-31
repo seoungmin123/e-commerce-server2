@@ -21,7 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Sql(scripts = {"file:./init/01-cleanup.sql", "file:./init/03-test-data.sql"})
+@Sql(scripts = {"file:./init/01-cleanup.sql"
+        , "file:./init/05-product_popularity_dummy.sql"})
 class PaymentControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;

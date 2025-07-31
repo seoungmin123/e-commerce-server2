@@ -17,7 +17,8 @@ import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.*;
 @SpringBootTest
-@Sql(scripts = {"file:./init/01-cleanup.sql", "file:./init/03-test-data.sql"})
+@Sql(scripts = {"file:./init/01-cleanup.sql"
+        , "file:./init/05-product_popularity_dummy.sql"})
 class PointServiceIntegrationTest {
 
     @Autowired

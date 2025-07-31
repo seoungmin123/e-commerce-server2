@@ -17,7 +17,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@Sql(scripts = {"file:./init/01-cleanup.sql", "file:./init/03-test-data.sql"})
+@Sql(scripts = {"file:./init/01-cleanup.sql"
+        , "file:./init/05-product_popularity_dummy.sql"})
 class OrderServiceIntegrationTest {
     @Autowired
     private OrderService orderService;
