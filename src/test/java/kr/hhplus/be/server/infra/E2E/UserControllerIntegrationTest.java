@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.infra;
+package kr.hhplus.be.server.infra.E2E;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;

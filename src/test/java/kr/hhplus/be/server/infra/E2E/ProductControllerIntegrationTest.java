@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.infra;
+package kr.hhplus.be.server.infra.E2E;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

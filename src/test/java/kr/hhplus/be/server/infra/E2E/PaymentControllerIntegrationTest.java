@@ -1,6 +1,9 @@
-package kr.hhplus.be.server.infra;
+package kr.hhplus.be.server.infra.E2E;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kr.hhplus.be.server.payment.controller.PaymentCreateRequest;
+import kr.hhplus.be.server.user.domain.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -9,44 +12,36 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import java.math.BigDecimal;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @Sql(scripts = {"file:./init/01-cleanup.sql"
         , "file:./init/05-product_popularity_dummy.sql"})
-class CouponControllerIntegrationTest {
+class PaymentControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    private static final String USER_ID = "USER-ID";
-    private static final String TEST_USER_ID = "1";
-
     @Test
-    void 인증된_사용자의_쿠폰_발급시_200_응답이_반환된다() throws Exception {
+    void 결제_생성_요청이_성공하면_200_응답이_반환된다() throws Exception {
         // given
-        Long couponId = 1L;
+        User user = User.create("테스트유저");
+        PaymentCreateRequest request = new PaymentCreateRequest(user, 1L, BigDecimal.valueOf(10000));
 
         // when & then
-        mockMvc.perform(post("/coupons/{couponId}/issue", couponId)
-                        .header(USER_ID, TEST_USER_ID)
-                        .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(post("/payments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andDo(print());
-    }
-
-    @Test
-    void 내_쿠폰_목록_조회시_200_응답이_반환된다() throws Exception {
-        // when & then
-        mockMvc.perform(get("/coupons/my")
-                        .header(USER_ID, TEST_USER_ID))
-                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.orderId").exists())
                 .andDo(print());
     }
 }
