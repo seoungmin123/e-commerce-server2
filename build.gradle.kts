@@ -36,7 +36,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 
 	// DB
-	runtimeOnly("com.mysql:mysql-connector-j")
+	implementation("com.mysql:mysql-connector-j:8.0.33") // 버전 명시도 함께 권장
 
 	// Test
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

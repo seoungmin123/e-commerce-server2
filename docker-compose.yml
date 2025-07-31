@@ -11,9 +11,10 @@ services:
       - MYSQL_DATABASE=hhplus
     volumes:
       - ./data/mysql/:/var/lib/mysql
-      - ./init/01-cleanup.sql:/docker-entrypoint-initdb.d/01-cleanup.sql
-      - ./init/02-init.sql:/docker-entrypoint-initdb.d/02-init.sql
-      - ./init/03-test-data.sql:/docker-entrypoint-initdb.d/03-test-data.sql
+   #   - ./init/02-init.sql:/docker-entrypoint-initdb.d/02-init.sql
+    #  - ./init/03-test-data.sql:/docker-entrypoint-initdb.d/03-test-data.sql
+    #  - ./init/04-test_dummy.sql:/docker-entrypoint-initdb.d/04-test_dummy.sql
+     # - ./init/05-product_popularity_dummy.sql:/docker-entrypoint-initdb.d/05-product_popularity_dummy.sql
 networks:
   default:
     driver: bridge
