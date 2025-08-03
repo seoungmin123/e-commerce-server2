@@ -38,6 +38,9 @@ public class Point extends BaseEntity {
     @OneToMany(mappedBy = "point", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<PointHistory> histories = new ArrayList<>();
 
+    @Version
+    private Long version;
+
     private Point(User user, BigDecimal point) {
         this.user = user;
         this.point = point;

@@ -20,16 +20,6 @@ import static kr.hhplus.be.server.common.exception.ApiErrorCode.NOT_FOUND;
 public class PointService {
     private final IPointRepository pointRepository;
 
-    // 포인트 충전
-    @Transactional
-    public PointInfo chargePoint(PointChargeCommand command) {
-        Point point = pointRepository.findByUser(command.user()).orElseGet(()
-                -> pointRepository.save(Point.create(command.user())));
-        point.charge(command.amount());
-        point = pointRepository.save(point);
-        return PointInfo.from(point);
-    }
-
     // 포인트 조회
     @Transactional(readOnly = true)
     public PointInfo getPoint(User user) {
@@ -37,10 +27,22 @@ public class PointService {
         return PointInfo.from(point);
     }
 
+        // 포인트 충전
+        @Transactional
+        public PointInfo chargePoint(PointChargeCommand command) {
+            // DB에서 사용자의 포인트 정보를 읽어옴 (OPTIMISTIC)
+            Point point = pointRepository.findByUserWithLock(command.user()).orElseGet(()
+                    -> pointRepository.save(Point.create(command.user())));
+            point.charge(command.amount());
+            point = pointRepository.save(point);
+        return PointInfo.from(point);
+    }
+
     // 포인트 사용
     @Transactional
     public void use(User user, BigDecimal amount) {
-        Point point = pointRepository.findByUser(user).orElseThrow(() -> new ApiException(NOT_FOUND));
+        // DB에서 사용자의 포인트 정보를 읽어옴 (OPTIMISTIC)
+        Point point = pointRepository.findByUserWithLock(user).orElseThrow(() -> new ApiException(NOT_FOUND));
         point.use(amount);
         pointRepository.save(point);
     }
