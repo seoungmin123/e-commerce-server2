@@ -2,7 +2,7 @@ package kr.hhplus.be.server.order.controller;
 
 
 import kr.hhplus.be.server.order.dto.OrderInfo;
-import kr.hhplus.be.server.order.facade.OrderResult;
+import kr.hhplus.be.server.application.order.OrderResult;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

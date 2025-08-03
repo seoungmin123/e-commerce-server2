@@ -1,6 +1,9 @@
 package kr.hhplus.be.server.order.facade;
 
 
+import kr.hhplus.be.server.application.order.OrderCreateCriteria;
+import kr.hhplus.be.server.application.order.OrderFacade;
+import kr.hhplus.be.server.application.order.OrderResult;
 import kr.hhplus.be.server.common.exception.ApiException;
 import kr.hhplus.be.server.order.domain.IOrderRepository;
 import kr.hhplus.be.server.order.domain.Order;

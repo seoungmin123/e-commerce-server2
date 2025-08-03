@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.order.controller;
 
-import kr.hhplus.be.server.order.facade.OrderCreateCriteria;
+import kr.hhplus.be.server.application.order.OrderCreateCriteria;
 import kr.hhplus.be.server.user.domain.User;
 
 import java.util.List;
