@@ -57,11 +57,12 @@ public class ProductService {
     @Transactional(readOnly = true)
     public List<ValidatedProductInfo> validateProducts(List<OrderCreateCommand.OrderItemCommand> orderItemCommands) {
 
-        // 상품 아이템 아이디 목록
+        // 상품 아이템 아이디 목록 추출
         List<Long> productIds = new ArrayList<>();
         for (OrderCreateCommand.OrderItemCommand cmd : orderItemCommands) {
             productIds.add(cmd.productId());
         }
+
         // 상품 아이템 존재하는지 확인
         List<Product> products = productRepository.findAllById(productIds);
 
@@ -70,45 +71,44 @@ public class ProductService {
             throw new ApiException(NOT_FOUND);
         }
 
-        // 상품정보 반환
-        List<ValidatedProductInfo> validatedProducts = new ArrayList<>();
+        // 주문 커맨드 productId 기준으로 상품정보 추출 k,v (성능 최적화)
+        Map<Long, OrderCreateCommand.OrderItemCommand> commandMap = orderItemCommands.stream()
+                .collect(Collectors.toMap(OrderCreateCommand.OrderItemCommand::productId, product -> product));
 
-        for (Product product : products) {
-            // 1. 현재 product에 해당하는 주문 커맨드 찾기
-            OrderCreateCommand.OrderItemCommand matchingCommand = null;
-
-            for (OrderCreateCommand.OrderItemCommand command : orderItemCommands) {
-                if (command.productId().equals(product.getId())) {
-                    matchingCommand = command;
-                    break;
-                }
-            }
-
-            // 2. 못 찾았으면 예외
-            if (matchingCommand == null) {
-                throw new ApiException(NOT_FOUND);
-            }
-
-            // 3. 찾았으면 ValidatedProductInfo 생성해서 리스트에 추가
-            ValidatedProductInfo validated = ValidatedProductInfo.of(product, matchingCommand.quantity());
-            validatedProducts.add(validated);
-        }
-
-        return validatedProducts;
+        // 상품 + 수량으로 ValidatedProductInfo 생성
+        return products.stream()
+                .map(product -> {
+                    OrderCreateCommand.OrderItemCommand command = commandMap.get(product.getId());
+                    if (command == null) {
+                        throw new ApiException(NOT_FOUND);
+                    }
+                    return ValidatedProductInfo.of(product, command.quantity());
+                })
+                .collect(Collectors.toList());
     }
 
     // 상품 재고차감
+    @Transactional
     public void deductStock(List<OrderCreateCommand.OrderItemCommand> commands) {
+        // 주문하려는 상품 ID들 추출
         List<Long> productIds = commands.stream()
                 .map(OrderCreateCommand.OrderItemCommand::productId)
                 .collect(Collectors.toList());
 
-        // fixme : in with lock
+        // DB에서 재고 정보를 읽어옴 (PESSIMISTIC_WRITE)
+        // 재고 정보 리스트
         List<ProductStock> stocks = productRepository.findAllByIdsWithLock(productIds);
 
+        //주문 id 갯수 != 상품 조회 id 갯수
+        if (stocks.size() != productIds.size()){
+            throw new ApiException(NOT_FOUND);
+        }
+
+        //상품주문 ids , 재고정보
         Map<Long, ProductStock> stockMap = stocks.stream()
                 .collect(Collectors.toMap(ProductStock::getId, stock -> stock));
 
+        //주문아이템의 상품정보 재고차감
         for (OrderCreateCommand.OrderItemCommand command : commands) {
             ProductStock stock = stockMap.get(command.productId());
             stock.deduct(command.quantity());
