@@ -1,6 +1,7 @@
-package kr.hhplus.be.server.coupon.domain;
+package kr.hhplus.be.server.coupon;
 
 import kr.hhplus.be.server.common.exception.ApiException;
+import kr.hhplus.be.server.coupon.domain.Coupon;
 import kr.hhplus.be.server.user.domain.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;

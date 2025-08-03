@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.order.facade;
+package kr.hhplus.be.server.application;
 
 
 import kr.hhplus.be.server.application.order.OrderCreateCriteria;

@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.paytment.service;
+package kr.hhplus.be.server.paytment;
 
 
 import kr.hhplus.be.server.common.exception.ApiErrorCode;

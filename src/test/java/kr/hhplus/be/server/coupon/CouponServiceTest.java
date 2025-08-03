@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.coupon.service;
+package kr.hhplus.be.server.coupon;
 
 
 import kr.hhplus.be.server.common.exception.ApiErrorCode;
@@ -8,6 +8,7 @@ import kr.hhplus.be.server.coupon.domain.CouponIssue;
 import kr.hhplus.be.server.coupon.domain.ICouponRepository;
 import kr.hhplus.be.server.coupon.dto.CouponDiscountInfo;
 import kr.hhplus.be.server.coupon.dto.CouponIssueCommand;
+import kr.hhplus.be.server.coupon.service.CouponService;
 import kr.hhplus.be.server.user.domain.User;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Test;

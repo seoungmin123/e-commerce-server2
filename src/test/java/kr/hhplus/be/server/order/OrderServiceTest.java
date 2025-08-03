@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.order.service;
+package kr.hhplus.be.server.order;
 
 import kr.hhplus.be.server.common.exception.ApiException;
 import kr.hhplus.be.server.order.domain.IOrderRepository;
@@ -6,6 +6,7 @@ import kr.hhplus.be.server.order.domain.Order;
 import kr.hhplus.be.server.order.dto.OrderConfirmCommand;
 import kr.hhplus.be.server.order.dto.OrderCreateCommand;
 import kr.hhplus.be.server.order.dto.OrderInfo;
+import kr.hhplus.be.server.order.service.OrderService;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.user.domain.User;
 import org.junit.jupiter.api.Test;
