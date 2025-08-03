@@ -28,7 +28,7 @@ public class OrderFacade {
     private final CouponService couponService;
 
     @Transactional
-    public OrderResult order(OrderCriteria.Create criteria) {
+    public OrderResult order(OrderCriteria.Order criteria) {
         OrderCommand.Order orderCommand = criteria.toCommand();
 
         // 상품 검증

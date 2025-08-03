@@ -43,7 +43,7 @@ class OrderFacadeIntegrationTest {
     void 포인트가_부족하면_주문은_저장되고_결제만_실패한다() {
         // given
         User user = userRepository.findById(1L).orElseThrow();
-        OrderCriteria.Create criteria = new OrderCriteria.Create( user,
+        OrderCriteria.Order criteria = new OrderCriteria.Order( user,
                 List.of(new OrderCriteria.Item(1L, 15)),  // 150,000원 > 보유 포인트
                 null
         );
@@ -79,7 +79,7 @@ class OrderFacadeIntegrationTest {
     void 주문과_결제가_한번에_정상적으로_처리된다() {
         // given
         User user = userRepository.findById(1L).orElseThrow();
-        OrderCriteria.Create criteria = new OrderCriteria.Create(user,
+        OrderCriteria.Order criteria = new OrderCriteria.Order(user,
                 List.of(new OrderCriteria.Item(2L, 2)),  // 다른 상품으로 테스트
                 null  // 쿠폰 미사용
         );

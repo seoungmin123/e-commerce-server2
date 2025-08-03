@@ -10,8 +10,8 @@ public record OrderCreateRequest(
         List<OrderProductRequest> products,
         Long couponIssueId
 ) {
-    public OrderCriteria.Create toCriteria() {
-        return new OrderCriteria.Create(
+    public OrderCriteria.Order toCriteria() {
+        return new OrderCriteria.Order(
                 this.user(),
                 this.products().stream()
                         .map(orderProductRequest -> orderProductRequest.toCriteria())
