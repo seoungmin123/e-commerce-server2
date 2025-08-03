@@ -3,7 +3,7 @@ package kr.hhplus.be.server.product.service;
 
 import kr.hhplus.be.server.common.exception.ApiException;
 import kr.hhplus.be.server.order.domain.IOrderRepository;
-import kr.hhplus.be.server.order.dto.OrderCreateCommand;
+import kr.hhplus.be.server.order.dto.OrderCommand;
 import kr.hhplus.be.server.product.domain.IProductRepository;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.product.domain.ProductStock;
@@ -55,11 +55,11 @@ public class ProductService {
 
     // 상품 유효성 검증
     @Transactional(readOnly = true)
-    public List<ValidatedProductInfo> validateProducts(List<OrderCreateCommand.OrderItemCommand> orderItemCommands) {
+    public List<ValidatedProductInfo> validateProducts(List<OrderCommand.Item> orderItemCommands) {
 
         // 상품 아이템 아이디 목록 추출
         List<Long> productIds = new ArrayList<>();
-        for (OrderCreateCommand.OrderItemCommand cmd : orderItemCommands) {
+        for (OrderCommand.Item cmd : orderItemCommands) {
             productIds.add(cmd.productId());
         }
 
@@ -72,13 +72,13 @@ public class ProductService {
         }
 
         // 주문 커맨드 productId 기준으로 상품정보 추출 k,v (성능 최적화)
-        Map<Long, OrderCreateCommand.OrderItemCommand> commandMap = orderItemCommands.stream()
-                .collect(Collectors.toMap(OrderCreateCommand.OrderItemCommand::productId, product -> product));
+        Map<Long, OrderCommand.Item> commandMap = orderItemCommands.stream()
+                .collect(Collectors.toMap(OrderCommand.Item::productId, product -> product));
 
         // 상품 + 수량으로 ValidatedProductInfo 생성
         return products.stream()
                 .map(product -> {
-                    OrderCreateCommand.OrderItemCommand command = commandMap.get(product.getId());
+                    OrderCommand.Item command = commandMap.get(product.getId());
                     if (command == null) {
                         throw new ApiException(NOT_FOUND);
                     }
@@ -89,10 +89,10 @@ public class ProductService {
 
     // 상품 재고차감
     @Transactional
-    public void deductStock(List<OrderCreateCommand.OrderItemCommand> commands) {
+    public void deductStock(List<OrderCommand.Item> commands) {
         // 주문하려는 상품 ID들 추출
         List<Long> productIds = commands.stream()
-                .map(OrderCreateCommand.OrderItemCommand::productId)
+                .map(OrderCommand.Item::productId)
                 .collect(Collectors.toList());
 
         // DB에서 재고 정보를 읽어옴 (PESSIMISTIC_WRITE)
@@ -109,7 +109,7 @@ public class ProductService {
                 .collect(Collectors.toMap(ProductStock::getId, stock -> stock));
 
         //주문아이템의 상품정보 재고차감
-        for (OrderCreateCommand.OrderItemCommand command : commands) {
+        for (OrderCommand.Item command : commands) {
             ProductStock stock = stockMap.get(command.productId());
             stock.deduct(command.quantity());
         }

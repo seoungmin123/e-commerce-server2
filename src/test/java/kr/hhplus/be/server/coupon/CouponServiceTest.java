@@ -6,8 +6,8 @@ import kr.hhplus.be.server.common.exception.ApiException;
 import kr.hhplus.be.server.coupon.domain.Coupon;
 import kr.hhplus.be.server.coupon.domain.CouponIssue;
 import kr.hhplus.be.server.coupon.domain.ICouponRepository;
+import kr.hhplus.be.server.coupon.dto.CouponCommand;
 import kr.hhplus.be.server.coupon.dto.CouponDiscountInfo;
-import kr.hhplus.be.server.coupon.dto.CouponIssueCommand;
 import kr.hhplus.be.server.coupon.service.CouponService;
 import kr.hhplus.be.server.user.domain.User;
 import org.assertj.core.api.AssertionsForClassTypes;
@@ -37,12 +37,12 @@ class CouponServiceTest {
         // given
         User user = mock(User.class);
         Long couponId = 999L;
-        CouponIssueCommand command = new CouponIssueCommand(couponId);
+        CouponCommand.Issue command = new CouponCommand.Issue(user, couponId);
 
         when(couponRepository.findByIdWithLock(couponId)).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> couponService.issueCoupon(user, command))
+        assertThatThrownBy(() -> couponService.issueCoupon(command))
                 .isInstanceOf(ApiException.class)
                 .hasFieldOrPropertyWithValue("apiErrorCode", NOT_FOUND);
         verify(couponRepository).findByIdWithLock(couponId);
@@ -54,7 +54,7 @@ class CouponServiceTest {
         // given
         User user = mock(User.class);
         Long couponId = 1L;
-        CouponIssueCommand command = new CouponIssueCommand(couponId);
+        CouponCommand.Issue command = new CouponCommand.Issue(user,couponId);
 
         Coupon coupon = mock(Coupon.class);
         CouponIssue couponIssue = mock(CouponIssue.class);
@@ -65,7 +65,7 @@ class CouponServiceTest {
                 .thenThrow(new DataIntegrityViolationException("중복 쿠폰 발급"));
 
         // when & then
-        assertThatThrownBy(() -> couponService.issueCoupon(user, command))
+        assertThatThrownBy(() -> couponService.issueCoupon(command))
                 .isInstanceOf(ApiException.class)
                 .hasFieldOrPropertyWithValue("apiErrorCode", ApiErrorCode.CONFLICT);
 

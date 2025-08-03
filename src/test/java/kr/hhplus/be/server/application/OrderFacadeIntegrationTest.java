@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.application;
 
 
-import kr.hhplus.be.server.application.order.OrderCreateCriteria;
+import kr.hhplus.be.server.application.order.OrderCriteria;
 import kr.hhplus.be.server.application.order.OrderFacade;
 import kr.hhplus.be.server.application.order.OrderResult;
 import kr.hhplus.be.server.common.exception.ApiException;
@@ -21,7 +21,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static kr.hhplus.be.server.common.exception.ApiErrorCode.INVALID_REQUEST;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Sql(scripts = {"file:./init/01-cleanup.sql", "file:./init/03-test-data.sql"})
@@ -42,8 +43,8 @@ class OrderFacadeIntegrationTest {
     void 포인트가_부족하면_주문은_저장되고_결제만_실패한다() {
         // given
         User user = userRepository.findById(1L).orElseThrow();
-        OrderCreateCriteria criteria = new OrderCreateCriteria( user,
-                List.of(new OrderCreateCriteria.OrderItemCriteria(1L, 15)),  // 150,000원 > 보유 포인트
+        OrderCriteria.Create criteria = new OrderCriteria.Create( user,
+                List.of(new OrderCriteria.Item(1L, 15)),  // 150,000원 > 보유 포인트
                 null
         );
 
@@ -78,8 +79,8 @@ class OrderFacadeIntegrationTest {
     void 주문과_결제가_한번에_정상적으로_처리된다() {
         // given
         User user = userRepository.findById(1L).orElseThrow();
-        OrderCreateCriteria criteria = new OrderCreateCriteria(user,
-                List.of(new OrderCreateCriteria.OrderItemCriteria(2L, 2)),  // 다른 상품으로 테스트
+        OrderCriteria.Create criteria = new OrderCriteria.Create(user,
+                List.of(new OrderCriteria.Item(2L, 2)),  // 다른 상품으로 테스트
                 null  // 쿠폰 미사용
         );
 

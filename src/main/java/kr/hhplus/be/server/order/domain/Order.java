@@ -54,23 +54,6 @@ public class Order extends BaseEntity {
     @OneToMany(mappedBy = "order", fetch = LAZY, cascade = CascadeType.ALL)
     private List<OrderItem> orderItems = new ArrayList<>();
 
-
-    public enum OrderStatus {
-        PENDING("결제 대기"),
-        PAID("결제 완료"),
-        CANCELLED("주문 취소");
-
-        private final String description;
-
-        OrderStatus(String description) {
-            this.description = description;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-    }
-
     private Order(User user) {
         this.user = user;
         this.status = OrderStatus.PENDING;
@@ -92,7 +75,9 @@ public class Order extends BaseEntity {
 
     // 주문 상품가격 계산
     public void calculateOrderAmounts() {
-        this.itemAmount = calculateItemAmounts();
+        this.itemAmount = orderItems.stream()
+                .map(item -> item.getOrderPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         this.totalAmount = this.itemAmount;
         this.paymentAmount = this.totalAmount.subtract(this.discountAmount);
     }
@@ -102,13 +87,6 @@ public class Order extends BaseEntity {
         this.discountAmount = discountAmount;
         this.paymentAmount = this.totalAmount.subtract(this.discountAmount);
         this.couponId = couponIssueId;
-    }
-
-    // 주문 아이템 가격계산
-    private BigDecimal calculateItemAmounts() {
-        return orderItems.stream()
-                .map(item -> item.getOrderPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     //fixme 주문확인
@@ -125,4 +103,19 @@ public class Order extends BaseEntity {
                 .sum();
     }
 
+    public enum OrderStatus {
+        PENDING("결제 대기"),
+        PAID("결제 완료"),
+        CANCELLED("주문 취소");
+
+        private final String description;
+
+        OrderStatus(String description) {
+            this.description = description;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+    }
 }

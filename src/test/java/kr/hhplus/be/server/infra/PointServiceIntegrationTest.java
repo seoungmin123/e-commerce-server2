@@ -3,7 +3,7 @@ package kr.hhplus.be.server.infra;
 
 import kr.hhplus.be.server.point.domain.IPointRepository;
 import kr.hhplus.be.server.point.domain.Point;
-import kr.hhplus.be.server.point.dto.PointChargeCommand;
+import kr.hhplus.be.server.point.dto.PointCommand;
 import kr.hhplus.be.server.point.dto.PointInfo;
 import kr.hhplus.be.server.point.service.PointService;
 import kr.hhplus.be.server.user.domain.IUserRepository;
@@ -15,7 +15,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 import java.math.BigDecimal;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Sql(scripts = {"file:./init/01-cleanup.sql"
         , "file:./init/05-product_popularity_dummy.sql"})
@@ -38,7 +38,7 @@ class PointServiceIntegrationTest {
         BigDecimal chargeAmount = BigDecimal.valueOf(50000).setScale(2);
 
         // when
-        PointInfo result = pointService.chargePoint(new PointChargeCommand(user, chargeAmount));
+        PointInfo result = pointService.charge(new PointCommand.Charge(user, chargeAmount));
 
         // then
         assertThat(result.point()).isEqualTo(initialAmount.add(chargeAmount));

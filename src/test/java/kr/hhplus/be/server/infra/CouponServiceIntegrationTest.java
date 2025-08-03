@@ -2,8 +2,8 @@ package kr.hhplus.be.server.infra;
 
 
 import kr.hhplus.be.server.common.exception.ApiException;
+import kr.hhplus.be.server.coupon.dto.CouponCommand;
 import kr.hhplus.be.server.coupon.dto.CouponInfo;
-import kr.hhplus.be.server.coupon.dto.CouponIssueCommand;
 import kr.hhplus.be.server.coupon.service.CouponService;
 import kr.hhplus.be.server.user.domain.IUserRepository;
 import kr.hhplus.be.server.user.domain.User;
@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static kr.hhplus.be.server.common.exception.ApiErrorCode.INSUFFICIENT_COUPON;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Sql(scripts = {"file:./init/01-cleanup.sql"
@@ -43,7 +43,7 @@ class CouponServiceIntegrationTest {
                 .orElseThrow(() -> new RuntimeException("테스트 데이터가 없습니다."));
 
         // when
-        CouponInfo couponInfo = couponService.issueCoupon(user, new CouponIssueCommand(1L));
+        CouponInfo couponInfo = couponService.issueCoupon(new CouponCommand.Issue(user,1L));
 
         // then
         assertThat(couponInfo.couponId()).isEqualTo(1L);
@@ -72,7 +72,7 @@ class CouponServiceIntegrationTest {
 
             executorService.submit(() -> {
                 try {
-                    couponService.issueCoupon(user, new CouponIssueCommand(couponId));
+                    couponService.issueCoupon(new CouponCommand.Issue(user, couponId));
                     successCount.incrementAndGet();
                 } catch (ApiException e) {
                     if (e.getApiErrorCode() == INSUFFICIENT_COUPON) {

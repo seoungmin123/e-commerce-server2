@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.infra;
 
 
-import kr.hhplus.be.server.order.dto.OrderCreateCommand;
+import kr.hhplus.be.server.order.dto.OrderCommand;
 import kr.hhplus.be.server.order.dto.OrderInfo;
 import kr.hhplus.be.server.order.service.OrderService;
 import kr.hhplus.be.server.user.domain.User;
@@ -27,8 +27,8 @@ class OrderServiceIntegrationTest {
     void 주문생성시_재고가_정상적으로_차감되고_주문정보가_생성된다() {
         // given
         User user = User.create("테스트유저");
-        OrderCreateCommand command = new OrderCreateCommand(user,
-                List.of(new OrderCreateCommand.OrderItemCommand(1L, null,10)),  // 테스트상품1 10개
+        OrderCommand.Order command = new OrderCommand.Order(user,
+                List.of(new OrderCommand.Item(1L, null,10)),  // 테스트상품1 10개
                 null  // 쿠폰 미사용
         );
 
@@ -50,8 +50,8 @@ class OrderServiceIntegrationTest {
         User user = User.create("테스트유저");
         ReflectionTestUtils.setField(user, "id", 1L);
 
-        OrderCreateCommand command = new OrderCreateCommand(user,
-                List.of(new OrderCreateCommand.OrderItemCommand(1L, null,5)),  // 테스트상품1 5개
+        OrderCommand.Order command = new OrderCommand.Order(user,
+                List.of(new OrderCommand.Item(1L, null,5)),  // 테스트상품1 5개
                 3L );
 
         // when
