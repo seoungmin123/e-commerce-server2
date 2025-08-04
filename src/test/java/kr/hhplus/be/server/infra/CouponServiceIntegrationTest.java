@@ -1,6 +1,9 @@
 package kr.hhplus.be.server.infra;
 
 
+import kr.hhplus.be.server.DataBaseCleanUp;
+import kr.hhplus.be.server.ServerApplication;
+import kr.hhplus.be.server.common.exception.ApiErrorCode;
 import kr.hhplus.be.server.common.exception.ApiException;
 import kr.hhplus.be.server.coupon.dto.CouponCommand;
 import kr.hhplus.be.server.coupon.dto.CouponInfo;
@@ -9,10 +12,11 @@ import kr.hhplus.be.server.user.domain.IUserRepository;
 import kr.hhplus.be.server.user.domain.User;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.jdbc.Sql;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -24,16 +28,23 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static kr.hhplus.be.server.common.exception.ApiErrorCode.INSUFFICIENT_COUPON;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-@SpringBootTest
-@Sql(scripts = {"file:./init/01-cleanup.sql"
-        , "file:./init/05-product_popularity_dummy.sql"})
+@SpringBootTest(classes = ServerApplication.class)
+@Testcontainers
 class CouponServiceIntegrationTest {
     @Autowired
     private CouponService couponService;
     @Autowired
     private IUserRepository userRepository;
 
+    @Autowired
+    private DataBaseCleanUp dataBaseCleanUp;
+
+    @BeforeEach
+    public void setUp() {
+        dataBaseCleanUp.execute();
+    }
 
     @Test
     void 쿠폰_발급이_정상적으로_동작한다() {
@@ -112,5 +123,28 @@ class CouponServiceIntegrationTest {
                     AssertionsForClassTypes.assertThat(coupon.discountAmount()).isEqualTo(BigDecimal.valueOf(10).setScale(2));
                     AssertionsForClassTypes.assertThat(coupon.usedAt()).isNotNull();
                 });
+    }
+
+
+    @Test
+    void 동일유저가_이미_발급받은_쿠폰을_재발급시_CONFLICT_예외가_발생한다() {
+        // given
+        Long userId = 1L;
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("테스트 데이터가 없습니다."));
+        Long couponId = 1L;
+        CouponCommand.Issue command = new CouponCommand.Issue(user,couponId);
+
+        // when
+        // 첫 번째 발급 시도
+        couponService.issueCoupon(command);
+
+        // then
+        // 두 번째 발급 시도시 예외 발생
+        assertThatThrownBy(() ->
+                couponService.issueCoupon(command)
+        )
+                .isInstanceOf(ApiException.class)
+                .hasFieldOrPropertyWithValue("apiErrorCode", ApiErrorCode.CONFLICT);
     }
 }
