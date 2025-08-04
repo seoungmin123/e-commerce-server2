@@ -40,7 +40,7 @@ public class OrderFacade {
 
         // 쿠폰 사용 및 할인 적용
         CouponDiscountInfo discountInfo = couponService.use(criteria.user(), criteria.couponIssueId(), orderInfo.totalAmount());
-        orderInfo = orderService.applyCoupon(orderInfo.orderId(), discountInfo.couponIssueId(), discountInfo.discountAmount());
+        orderInfo = orderService.applyCoupon(OrderCommand.ApplyCoupon.of(orderInfo.orderId(), criteria.couponIssueId(), discountInfo.discountAmount()));
 
         // 결제, 포인트 차감, 재고 차감
         paymentService.pay(PaymentCommand.Pay.of(criteria.user(), orderInfo.orderId(), orderInfo.paymentAmount()));
