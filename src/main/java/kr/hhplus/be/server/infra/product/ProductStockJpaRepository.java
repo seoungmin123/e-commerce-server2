@@ -20,4 +20,10 @@ public interface ProductStockJpaRepository extends JpaRepository<ProductStock, L
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT ps FROM ProductStock ps WHERE ps.id IN :productIds")
     List<ProductStock> findAllByIdsWithLock(List<Long> productIds);
+
+    @Query("SELECT ps FROM ProductStock ps left join ps.product p WHERE p.id = :productId")
+    Optional<ProductStock> findByProductId(@Param("productId") Long productId);
+
+    @Query("SELECT ps FROM ProductStock ps left join ps.product p WHERE p.id IN :productIds")
+    List<ProductStock> findAllByProductIds(@Param("productIds") List<Long> productIds);
 }

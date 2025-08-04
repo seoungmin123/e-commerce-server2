@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.product.dto;
 
 import kr.hhplus.be.server.product.domain.Product;
+import kr.hhplus.be.server.product.domain.ProductStock;
 
 import java.math.BigDecimal;
 
@@ -10,7 +11,7 @@ public record ProductInfo(
         BigDecimal price,
         int stock
 ) {
-    public static ProductInfo from(Product product) {
-        return new ProductInfo(product.getId(), product.getName(), product.getPrice(), product.getProductStock().getQuantity());
+    public static ProductInfo of(Product product, ProductStock stock) {
+        return new ProductInfo(product.getId(), product.getName(), product.getPrice(), stock.getQuantity());
     }
 }

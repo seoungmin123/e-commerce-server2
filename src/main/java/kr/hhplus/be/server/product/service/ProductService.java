@@ -40,7 +40,22 @@ public class ProductService {
             return Collections.emptyList(); // null 또는 빈 리스트일 때 빈 리스트 반환
         }
 
-        return products.stream().map(ProductInfo::from).toList();
+        List<Long> productsIds = products.stream()
+                .map(Product::getId)
+                .collect(Collectors.toList());
+
+        //상품 재고 정보
+        List<ProductStock> productStocks = productRepository.findAllByProductIds(productsIds);
+
+
+        // 상품 재고 정보 추출 k,v
+        Map<Long, ProductStock> stockMap = productStocks.stream()
+                .collect(Collectors.toMap(stock -> stock.getProduct().getId(), stock -> stock));
+
+        return products.stream().map(product -> {
+            ProductStock stock = stockMap.get(product.getId());
+            return ProductInfo.of(product, stock);
+        }).toList();
     }
 
     // 인기상품 조회 : 상위 5개

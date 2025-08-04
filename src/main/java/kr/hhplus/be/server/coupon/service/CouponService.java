@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static kr.hhplus.be.server.common.exception.ApiErrorCode.NOT_FOUND;
 
@@ -47,7 +46,7 @@ public class CouponService {
         List<CouponIssue> couponIssues = couponRepository.findAllByUser(user);
         return couponIssues.stream()
                 .map(CouponInfo::from)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     //쿠폰 사용
