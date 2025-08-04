@@ -83,7 +83,7 @@ class OrderServiceTest {
 
         // when & then
         assertThatThrownBy(() ->
-                orderService.applyCoupon(nonExistentOrderId, 1L, BigDecimal.valueOf(5000)))
+                orderService.applyCoupon(new OrderCommand.ApplyCoupon(nonExistentOrderId, 1L, BigDecimal.valueOf(5000))))
                 .isInstanceOf(ApiException.class)
                 .hasFieldOrPropertyWithValue("apiErrorCode", NOT_FOUND);
     }
