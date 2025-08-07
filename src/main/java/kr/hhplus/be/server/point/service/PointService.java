@@ -27,7 +27,7 @@ public class PointService {
         return PointInfo.from(point);
     }
 
-    // 포인트 충전
+    // 포인트 충전 낙관적락
     @Transactional
     public PointInfo charge(PointCommand.Charge command) {
         try{
@@ -44,7 +44,7 @@ public class PointService {
         }
     }
 
-    // 포인트 사용
+    // 포인트 사용 낙관적락
     @Transactional
     public void use(PointCommand.Use command) {
         try{

@@ -16,6 +16,7 @@ public interface PointJpaRepository extends JpaRepository<Point, Long> {
 
     Optional<Point> findByUser(User user);
 
+    // 낙관적락 적용
     @Lock(LockModeType.OPTIMISTIC)
     @Query("SELECT p FROM Point p WHERE p.user = :user")
     Optional<Point> findByUserWithLock(@Param("user") User user);
