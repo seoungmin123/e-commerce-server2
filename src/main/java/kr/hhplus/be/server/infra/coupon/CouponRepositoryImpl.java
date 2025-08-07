@@ -22,6 +22,7 @@ public class CouponRepositoryImpl implements ICouponRepository {
         return couponJpaRepository.findById(id);
     }
 
+    // 비관적 쓰기락 적용
     @Override
     public Optional<Coupon> findByIdWithLock(Long id) {
         return couponJpaRepository.findByIdWithLock(id);

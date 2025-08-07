@@ -25,7 +25,7 @@ import static kr.hhplus.be.server.common.exception.ApiErrorCode.NOT_FOUND;
 public class CouponService {
     private final ICouponRepository couponRepository;
 
-    // 쿠폰 발급
+    // 쿠폰 발급  비관적 쓰기락 적용
     @Transactional
     public CouponInfo issueCoupon(CouponCommand.Issue command) {
         // DB에서 쿠폰 정보를 읽어옴 (PESSIMISTIC_WRITE)

@@ -13,6 +13,7 @@ import static jakarta.persistence.LockModeType.PESSIMISTIC_WRITE;
 
 public interface CouponJpaRepository extends JpaRepository<Coupon, Long> {
 
+    // 비관적 쓰기락 적용
     @Lock(value = PESSIMISTIC_WRITE)
     @Query("SELECT c FROM Coupon c WHERE c.id = :id")
     Optional<Coupon> findByIdWithLock(@Param("id") Long id);
