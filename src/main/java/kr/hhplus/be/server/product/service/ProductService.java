@@ -102,7 +102,7 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    // 상품 재고차감
+    // 상품 재고차감 비관적락 적용
     @Transactional
     public void deductStock(List<OrderCommand.Item> commands) {
         // 주문하려는 상품 ID들 추출

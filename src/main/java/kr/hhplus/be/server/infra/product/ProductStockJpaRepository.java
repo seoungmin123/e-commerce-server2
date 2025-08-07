@@ -13,10 +13,12 @@ import java.util.Optional;
 
 public interface ProductStockJpaRepository extends JpaRepository<ProductStock, Long> {
 
+    //비관적락 적용
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT ps FROM ProductStock ps WHERE ps.id = :id")
     Optional<ProductStock> findByIdWithLock(@Param("id") Long id);
 
+    //비관적락 적용
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT ps FROM ProductStock ps WHERE ps.id IN :productIds")
     List<ProductStock> findAllByIdsWithLock(List<Long> productIds);

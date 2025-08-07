@@ -27,6 +27,7 @@ public class OrderFacade {
     private final PointService pointService;
     private final CouponService couponService;
 
+    // 주문 파사드
     @Transactional
     public OrderResult order(OrderCriteria.Order criteria) {
         OrderCommand.Order orderCommand = criteria.toCommand();
