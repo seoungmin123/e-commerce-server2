@@ -42,7 +42,7 @@ public class ProductService {
 
         List<Long> productsIds = products.stream()
                 .map(Product::getId)
-                .collect(Collectors.toList());
+                .toList();
 
         //상품 재고 정보
         List<ProductStock> productStocks = productRepository.findAllByProductIds(productsIds);
@@ -99,7 +99,7 @@ public class ProductService {
                     }
                     return ValidatedProductInfo.of(product, command.quantity());
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // 상품 재고차감 비관적락 적용
