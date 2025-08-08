@@ -50,21 +50,6 @@ public class Coupon extends BaseEntity {
     @Column(name = "issued_quantity", nullable = false)
     private Integer issuedQuantity = 0;
 
-    public enum DiscountType {
-        FIXED("정액"),
-        PERCENTAGE("정률");
-
-        private final String description;
-
-        DiscountType(String description) {
-            this.description = description;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-    }
-
     private Coupon(String name, DiscountType discountType, BigDecimal discountValue,
                    LocalDateTime issueStartAt,
                    LocalDateTime issueEndAt, int validityPeriod, Integer totalIssueQuantity) {
@@ -107,5 +92,20 @@ public class Coupon extends BaseEntity {
         }
     }
 
+
+    public enum DiscountType {
+        FIXED("정액"),
+        PERCENTAGE("정률");
+
+        private final String description;
+
+        DiscountType(String description) {
+            this.description = description;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+    }
 
 }

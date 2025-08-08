@@ -2,16 +2,19 @@ package kr.hhplus.be.server.infra.E2E;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kr.hhplus.be.server.DataBaseCleanUp;
+import kr.hhplus.be.server.ServerApplication;
 import kr.hhplus.be.server.order.controller.OrderCreateRequest;
 import kr.hhplus.be.server.user.domain.User;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
@@ -20,10 +23,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(classes = ServerApplication.class)
 @AutoConfigureMockMvc
-@Sql(scripts = {"file:./init/01-cleanup.sql"
-        , "file:./init/05-product_popularity_dummy.sql"})
+@Testcontainers
 class OrderControllerIntegrationTest {
 
     @Autowired
@@ -32,6 +34,13 @@ class OrderControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private DataBaseCleanUp dataBaseCleanUp;
+
+    @BeforeEach
+    public void setUp() {
+        dataBaseCleanUp.execute();
+    }
     @Test
     void 주문_생성_요청이_성공하면_200_응답이_반환된다() throws Exception {
         // given

@@ -1,8 +1,10 @@
-package kr.hhplus.be.server.order.domain;
+package kr.hhplus.be.server.order;
 
 
 import kr.hhplus.be.server.common.exception.ApiErrorCode;
 import kr.hhplus.be.server.common.exception.ApiException;
+import kr.hhplus.be.server.order.domain.Order;
+import kr.hhplus.be.server.order.domain.OrderItem;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.user.domain.User;
 import org.junit.jupiter.api.Test;

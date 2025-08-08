@@ -32,11 +32,13 @@ public class ProductRepositoryImpl implements IProductRepository {
         return productJpaRepository.findById(id);
     }
 
+    // 비관적락 적용
     @Override
     public Optional<Product> findByIdWithStock(Long id) {
         return productJpaRepository.findByIdWithStock(id);
     }
 
+    //비관적락 적용
     @Override
     public Optional<ProductStock> findByIdWithLock(Long id) {
         return productStockJpaRepository.findByIdWithLock(id);
@@ -61,5 +63,17 @@ public class ProductRepositoryImpl implements IProductRepository {
     public List<Product> findAllById(List<Long> productIds) {
         return productJpaRepository.findAllById(productIds);
     }
+
+    @Override
+    public Optional<ProductStock> findByProductId(Long productId) {
+        return productStockJpaRepository.findByProductId(productId);
+    }
+
+    @Override
+    public List<ProductStock> findAllByProductIds(List<Long> productIds) {
+        return productStockJpaRepository.findAllByProductIds(productIds);
+    }
+
+
 
 }
