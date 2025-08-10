@@ -5,9 +5,9 @@ import kr.hhplus.be.server.common.exception.ApiException;
 import kr.hhplus.be.server.coupon.domain.Coupon;
 import kr.hhplus.be.server.coupon.domain.CouponIssue;
 import kr.hhplus.be.server.coupon.domain.ICouponRepository;
+import kr.hhplus.be.server.coupon.dto.CouponCommand;
 import kr.hhplus.be.server.coupon.dto.CouponDiscountInfo;
 import kr.hhplus.be.server.coupon.dto.CouponInfo;
-import kr.hhplus.be.server.coupon.dto.CouponIssueCommand;
 import kr.hhplus.be.server.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static kr.hhplus.be.server.common.exception.ApiErrorCode.NOT_FOUND;
 
@@ -26,12 +25,13 @@ import static kr.hhplus.be.server.common.exception.ApiErrorCode.NOT_FOUND;
 public class CouponService {
     private final ICouponRepository couponRepository;
 
-    // 쿠폰 발급
+    // 쿠폰 발급  비관적 쓰기락 적용
     @Transactional
-    public CouponInfo issueCoupon(User user, CouponIssueCommand command) {
+    public CouponInfo issueCoupon(CouponCommand.Issue command) {
+        // DB에서 쿠폰 정보를 읽어옴 (PESSIMISTIC_WRITE)
         Coupon coupon = couponRepository.findByIdWithLock(command.couponId()).orElseThrow(() -> new ApiException(NOT_FOUND));
 
-        CouponIssue couponIssue = coupon.issue(user);
+        CouponIssue couponIssue = coupon.issue(command.user());
         try {
             couponIssue = couponRepository.save(couponIssue);
         } catch (DataIntegrityViolationException ex) {
@@ -46,7 +46,7 @@ public class CouponService {
         List<CouponIssue> couponIssues = couponRepository.findAllByUser(user);
         return couponIssues.stream()
                 .map(CouponInfo::from)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     //쿠폰 사용

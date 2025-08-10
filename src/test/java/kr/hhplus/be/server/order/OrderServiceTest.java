@@ -1,11 +1,11 @@
-package kr.hhplus.be.server.order.service;
+package kr.hhplus.be.server.order;
 
 import kr.hhplus.be.server.common.exception.ApiException;
 import kr.hhplus.be.server.order.domain.IOrderRepository;
 import kr.hhplus.be.server.order.domain.Order;
-import kr.hhplus.be.server.order.dto.OrderConfirmCommand;
-import kr.hhplus.be.server.order.dto.OrderCreateCommand;
+import kr.hhplus.be.server.order.dto.OrderCommand;
 import kr.hhplus.be.server.order.dto.OrderInfo;
+import kr.hhplus.be.server.order.service.OrderService;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.user.domain.User;
 import org.junit.jupiter.api.Test;
@@ -21,11 +21,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static kr.hhplus.be.server.common.exception.ApiErrorCode.NOT_FOUND;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-
-import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
@@ -44,8 +43,8 @@ class OrderServiceTest {
         User user = mock(User.class);
         Product product = Product.create("테스트상품", BigDecimal.valueOf(10000));
         ReflectionTestUtils.setField(product, "id", 1L);
-        OrderCreateCommand command = new OrderCreateCommand(user,
-                List.of(new OrderCreateCommand.OrderItemCommand(1L,product, 2)),null
+        OrderCommand.Order command = new OrderCommand.Order(user,
+                List.of(new OrderCommand.Item(1L,product, 2)),null
         );
 
         when(orderRepository.save(any(Order.class)))
@@ -67,7 +66,7 @@ class OrderServiceTest {
         when(orderRepository.findById(nonExistentOrderId)).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> orderService.confirm(new OrderConfirmCommand(nonExistentOrderId)))
+        assertThatThrownBy(() -> orderService.confirm(new OrderCommand.Confirm(nonExistentOrderId)))
                 .isInstanceOf(ApiException.class)
                 .hasFieldOrPropertyWithValue("apiErrorCode", NOT_FOUND);
 
@@ -84,7 +83,7 @@ class OrderServiceTest {
 
         // when & then
         assertThatThrownBy(() ->
-                orderService.applyCoupon(nonExistentOrderId, 1L, BigDecimal.valueOf(5000)))
+                orderService.applyCoupon(new OrderCommand.ApplyCoupon(nonExistentOrderId, 1L, BigDecimal.valueOf(5000))))
                 .isInstanceOf(ApiException.class)
                 .hasFieldOrPropertyWithValue("apiErrorCode", NOT_FOUND);
     }

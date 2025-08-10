@@ -3,7 +3,7 @@ package kr.hhplus.be.server.product.service;
 
 import kr.hhplus.be.server.common.exception.ApiException;
 import kr.hhplus.be.server.order.domain.IOrderRepository;
-import kr.hhplus.be.server.order.dto.OrderCreateCommand;
+import kr.hhplus.be.server.order.dto.OrderCommand;
 import kr.hhplus.be.server.product.domain.IProductRepository;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.product.domain.ProductStock;
@@ -40,7 +40,22 @@ public class ProductService {
             return Collections.emptyList(); // null 또는 빈 리스트일 때 빈 리스트 반환
         }
 
-        return products.stream().map(ProductInfo::from).toList();
+        List<Long> productsIds = products.stream()
+                .map(Product::getId)
+                .toList();
+
+        //상품 재고 정보
+        List<ProductStock> productStocks = productRepository.findAllByProductIds(productsIds);
+
+
+        // 상품 재고 정보 추출 k,v
+        Map<Long, ProductStock> stockMap = productStocks.stream()
+                .collect(Collectors.toMap(stock -> stock.getProduct().getId(), stock -> stock));
+
+        return products.stream().map(product -> {
+            ProductStock stock = stockMap.get(product.getId());
+            return ProductInfo.of(product, stock);
+        }).toList();
     }
 
     // 인기상품 조회 : 상위 5개
@@ -55,13 +70,14 @@ public class ProductService {
 
     // 상품 유효성 검증
     @Transactional(readOnly = true)
-    public List<ValidatedProductInfo> validateProducts(List<OrderCreateCommand.OrderItemCommand> orderItemCommands) {
+    public List<ValidatedProductInfo> validateProducts(List<OrderCommand.Item> orderItemCommands) {
 
-        // 상품 아이템 아이디 목록
+        // 상품 아이템 아이디 목록 추출
         List<Long> productIds = new ArrayList<>();
-        for (OrderCreateCommand.OrderItemCommand cmd : orderItemCommands) {
+        for (OrderCommand.Item cmd : orderItemCommands) {
             productIds.add(cmd.productId());
         }
+
         // 상품 아이템 존재하는지 확인
         List<Product> products = productRepository.findAllById(productIds);
 
@@ -70,46 +86,45 @@ public class ProductService {
             throw new ApiException(NOT_FOUND);
         }
 
-        // 상품정보 반환
-        List<ValidatedProductInfo> validatedProducts = new ArrayList<>();
+        // 주문 커맨드 productId 기준으로 상품정보 추출 k,v (성능 최적화)
+        Map<Long, OrderCommand.Item> commandMap = orderItemCommands.stream()
+                .collect(Collectors.toMap(OrderCommand.Item::productId, product -> product));
 
-        for (Product product : products) {
-            // 1. 현재 product에 해당하는 주문 커맨드 찾기
-            OrderCreateCommand.OrderItemCommand matchingCommand = null;
-
-            for (OrderCreateCommand.OrderItemCommand command : orderItemCommands) {
-                if (command.productId().equals(product.getId())) {
-                    matchingCommand = command;
-                    break;
-                }
-            }
-
-            // 2. 못 찾았으면 예외
-            if (matchingCommand == null) {
-                throw new ApiException(NOT_FOUND);
-            }
-
-            // 3. 찾았으면 ValidatedProductInfo 생성해서 리스트에 추가
-            ValidatedProductInfo validated = ValidatedProductInfo.of(product, matchingCommand.quantity());
-            validatedProducts.add(validated);
-        }
-
-        return validatedProducts;
+        // 상품 + 수량으로 ValidatedProductInfo 생성
+        return products.stream()
+                .map(product -> {
+                    OrderCommand.Item command = commandMap.get(product.getId());
+                    if (command == null) {
+                        throw new ApiException(NOT_FOUND);
+                    }
+                    return ValidatedProductInfo.of(product, command.quantity());
+                })
+                .toList();
     }
 
-    // 상품 재고차감
-    public void deductStock(List<OrderCreateCommand.OrderItemCommand> commands) {
+    // 상품 재고차감 비관적락 적용
+    @Transactional
+    public void deductStock(List<OrderCommand.Item> commands) {
+        // 주문하려는 상품 ID들 추출
         List<Long> productIds = commands.stream()
-                .map(OrderCreateCommand.OrderItemCommand::productId)
+                .map(OrderCommand.Item::productId)
                 .collect(Collectors.toList());
 
-        // fixme : in with lock
+        // DB에서 재고 정보를 읽어옴 (PESSIMISTIC_WRITE)
+        // 재고 정보 리스트
         List<ProductStock> stocks = productRepository.findAllByIdsWithLock(productIds);
 
+        //주문 id 갯수 != 상품 조회 id 갯수
+        if (stocks.size() != productIds.size()){
+            throw new ApiException(NOT_FOUND);
+        }
+
+        //상품주문 ids , 재고정보
         Map<Long, ProductStock> stockMap = stocks.stream()
                 .collect(Collectors.toMap(ProductStock::getId, stock -> stock));
 
-        for (OrderCreateCommand.OrderItemCommand command : commands) {
+        //주문아이템의 상품정보 재고차감
+        for (OrderCommand.Item command : commands) {
             ProductStock stock = stockMap.get(command.productId());
             stock.deduct(command.quantity());
         }

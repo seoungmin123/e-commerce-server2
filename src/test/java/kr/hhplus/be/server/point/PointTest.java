@@ -1,8 +1,9 @@
-package kr.hhplus.be.server.point.domain;
+package kr.hhplus.be.server.point;
 
 
 import kr.hhplus.be.server.common.exception.ApiErrorCode;
 import kr.hhplus.be.server.common.exception.ApiException;
+import kr.hhplus.be.server.point.domain.Point;
 import kr.hhplus.be.server.user.domain.User;
 import org.junit.jupiter.api.Test;
 

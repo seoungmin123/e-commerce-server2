@@ -1,8 +1,10 @@
-package kr.hhplus.be.server.product.domain;
+package kr.hhplus.be.server.product;
 
 
 import kr.hhplus.be.server.common.exception.ApiErrorCode;
 import kr.hhplus.be.server.common.exception.ApiException;
+import kr.hhplus.be.server.product.domain.Product;
+import kr.hhplus.be.server.product.domain.ProductStock;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 import java.math.BigDecimal;

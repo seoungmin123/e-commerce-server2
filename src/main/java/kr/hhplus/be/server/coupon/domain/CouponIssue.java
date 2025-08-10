@@ -44,23 +44,6 @@ public class CouponIssue extends BaseEntity {
     @Column(name = "expired_at", nullable = false)
     private LocalDateTime expiredAt;
 
-    public enum CouponStatus {
-        UNUSED("미사용"),
-        USED("사용 완료"),
-        EXPIRED("기간 만료");
-
-        private final String description;
-
-        CouponStatus(String description) {
-            this.description = description;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-    }
-
-
     private CouponIssue(User user, Coupon coupon, LocalDateTime expiredAt) {
         this.user = user;
         this.coupon = coupon;
@@ -108,5 +91,22 @@ public class CouponIssue extends BaseEntity {
             return EXPIRED.getDescription();
         }
         return UNUSED.getDescription();
+    }
+
+
+    public enum CouponStatus {
+        UNUSED("미사용"),
+        USED("사용 완료"),
+        EXPIRED("기간 만료");
+
+        private final String description;
+
+        CouponStatus(String description) {
+            this.description = description;
+        }
+
+        public String getDescription() {
+            return description;
+        }
     }
 }

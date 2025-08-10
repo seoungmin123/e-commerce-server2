@@ -10,7 +10,8 @@ CREATE TABLE point (
     user_id BIGINT NOT NULL,
     point DECIMAL(10,4),
     created_at DATETIME NOT NULL,
-    updated_at DATETIME NOT NULL
+    updated_at DATETIME NOT NULL,
+    version BIGINT NOT NULL
 );
 
 CREATE TABLE point_history (

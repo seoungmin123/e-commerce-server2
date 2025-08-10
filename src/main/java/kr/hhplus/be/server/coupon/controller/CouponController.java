@@ -3,8 +3,8 @@ package kr.hhplus.be.server.coupon.controller;
 import kr.hhplus.be.server.common.response.ApiResponse;
 import kr.hhplus.be.server.common.response.ApiResponseCode;
 import kr.hhplus.be.server.coupon.controller.swagger.CouponSwaggerDocs;
+import kr.hhplus.be.server.coupon.dto.CouponCommand;
 import kr.hhplus.be.server.coupon.dto.CouponInfo;
-import kr.hhplus.be.server.coupon.dto.CouponIssueCommand;
 import kr.hhplus.be.server.coupon.service.CouponService;
 import kr.hhplus.be.server.user.domain.User;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class CouponController implements CouponSwaggerDocs {
      */
     @PostMapping("/{couponId}/issue")
     public ApiResponse<CouponIssueResponse> issueCoupon(@RequestBody User user, @PathVariable Long couponId) {
-        CouponInfo couponInfo = couponService.issueCoupon(user, new CouponIssueCommand(couponId));
+        CouponInfo couponInfo = couponService.issueCoupon(new CouponCommand.Issue(user, couponId));
 
         return ApiResponse.success(ApiResponseCode.SUCCESS_OK_200, CouponIssueResponse.from(couponInfo));
     }

@@ -10,5 +10,5 @@ public interface IPointRepository {
 
     Optional<Point> findByUser(User user);
 
-    Optional<Point> findByUserId(long userId);
+    Optional<Point> findByUserWithLock(User user);
 }

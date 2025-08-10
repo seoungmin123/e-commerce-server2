@@ -1,12 +1,15 @@
 package kr.hhplus.be.server.infra;
 
+import kr.hhplus.be.server.DataBaseCleanUp;
+import kr.hhplus.be.server.ServerApplication;
 import kr.hhplus.be.server.product.dto.PopularProductInfo;
 import kr.hhplus.be.server.product.dto.ProductInfo;
 import kr.hhplus.be.server.product.service.ProductService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.jdbc.Sql;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,12 +18,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
 
-@SpringBootTest
-@Sql(scripts = {"file:./init/01-cleanup.sql"
-        , "file:./init/05-product_popularity_dummy.sql"})
+@SpringBootTest(classes = ServerApplication.class)
+@Testcontainers
 class ProductServiceIntegrationTest {
+
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private DataBaseCleanUp dataBaseCleanUp;
+
+    @BeforeEach
+    public void setUp() {
+        dataBaseCleanUp.execute();
+    }
+
     @Test
     void 상품목록_조회가_정상적으로_동작한다() {
         // when

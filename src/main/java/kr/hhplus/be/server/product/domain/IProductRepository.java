@@ -18,7 +18,12 @@ public interface IProductRepository {
 
     List<Product> findAllById(List<Long> productIds);
 
+    //비관적락 적용
     List<ProductStock> findAllByIdsWithLock(List<Long> productIds);
 
     List<ProductStock> saveAll(List<ProductStock> stocks);
+
+    Optional<ProductStock> findByProductId(Long productId);
+
+    List<ProductStock> findAllByProductIds(List<Long> productIds);
 }

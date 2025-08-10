@@ -21,8 +21,8 @@ public class PointHistory extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "point_id", nullable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "point_id", nullable = false
+    ,foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private Point point;
 
     @OneToOne(fetch = FetchType.LAZY)

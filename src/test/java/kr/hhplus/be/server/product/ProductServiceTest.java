@@ -1,10 +1,11 @@
-package kr.hhplus.be.server.product.service;
+package kr.hhplus.be.server.product;
 
 
 import kr.hhplus.be.server.order.domain.IOrderRepository;
 import kr.hhplus.be.server.product.domain.IProductRepository;
 import kr.hhplus.be.server.product.dto.PopularProductInfo;
 import kr.hhplus.be.server.product.dto.ProductInfo;
+import kr.hhplus.be.server.product.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

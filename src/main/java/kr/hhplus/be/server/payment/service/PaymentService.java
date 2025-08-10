@@ -3,7 +3,7 @@ package kr.hhplus.be.server.payment.service;
 import jakarta.transaction.Transactional;
 import kr.hhplus.be.server.payment.domain.IPaymentRepository;
 import kr.hhplus.be.server.payment.domain.Payment;
-import kr.hhplus.be.server.payment.dto.PaymentCreateCommand;
+import kr.hhplus.be.server.payment.dto.PaymentCommand;
 import kr.hhplus.be.server.payment.dto.PaymentInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ public class PaymentService {
 
 
     @Transactional
-    public PaymentInfo pay(PaymentCreateCommand command) {
+    public PaymentInfo pay(PaymentCommand.Pay command) {
         Payment payment = Payment.create(command.orderId(), command.paymentAmount());
         payment = paymentRepository.save(payment);
         return PaymentInfo.from(payment);

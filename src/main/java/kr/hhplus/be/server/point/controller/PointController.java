@@ -23,7 +23,7 @@ public class PointController implements PointSwaggerDocs {
     public ApiResponse<PointResponse> chargePoint(
             @RequestBody PointChargeRequest request
     ) {
-        PointInfo response = pointService.chargePoint(request.toCommand());
+        PointInfo response = pointService.charge(request.toCommand());
         return ApiResponse.success(ApiResponseCode.SUCCESS_OK_200,PointResponse.from(response));
     }
 
