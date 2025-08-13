@@ -68,6 +68,16 @@ dependencies {
 	annotationProcessor("com.querydsl:querydsl-apt:5.0.0:jakarta")
 	annotationProcessor("jakarta.annotation:jakarta.annotation-api")
 	annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+
+	// Fixture Monkey
+	testImplementation("com.navercorp.fixturemonkey:fixture-monkey-starter:1.1.11")
+
+	//redisson
+	implementation("org.redisson:redisson-spring-boot-starter:3.27.1")
+	testImplementation("com.redis:testcontainers-redis:2.2.2")
+
+	// Jetbrains Annotations
+	compileOnly("org.jetbrains:annotations:26.0.2")
 }
 
 tasks.withType<Test> {
