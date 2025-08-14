@@ -2,6 +2,7 @@ package kr.hhplus.be.server.product.service;
 
 
 import kr.hhplus.be.server.common.exception.ApiException;
+import kr.hhplus.be.server.common.redisson.DistributedLock;
 import kr.hhplus.be.server.order.domain.IOrderRepository;
 import kr.hhplus.be.server.order.dto.OrderCommand;
 import kr.hhplus.be.server.product.domain.IProductRepository;
@@ -12,6 +13,7 @@ import kr.hhplus.be.server.product.dto.PopularProductQuery;
 import kr.hhplus.be.server.product.dto.ProductInfo;
 import kr.hhplus.be.server.product.dto.ValidatedProductInfo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,7 +49,6 @@ public class ProductService {
         //상품 재고 정보
         List<ProductStock> productStocks = productRepository.findAllByProductIds(productsIds);
 
-
         // 상품 재고 정보 추출 k,v
         Map<Long, ProductStock> stockMap = productStocks.stream()
                 .collect(Collectors.toMap(stock -> stock.getProduct().getId(), stock -> stock));
@@ -59,13 +60,15 @@ public class ProductService {
     }
 
     // 인기상품 조회 : 상위 5개
+    // 최근 3일 Top5 고정이므로 캐시 키는 상수
     @Transactional(readOnly = true)
+    @Cacheable(value = "popularTop5", key = "'v1:last3d'")
     public List<PopularProductInfo> getTopFivePopularProducts() {
         List<PopularProductQuery> productQueries = orderRepository.findTopFivePopularProducts();
         AtomicLong rank = new AtomicLong(1);
         return productQueries.stream()
                 .map(query -> query.toInfo(rank.getAndIncrement()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // 상품 유효성 검증
@@ -102,17 +105,21 @@ public class ProductService {
                 .toList();
     }
 
-    // 상품 재고차감 비관적락 적용
     @Transactional
+    @DistributedLock(
+            topic = "stock",
+            keyExpression = "##commands.!['stock:' + productId]",
+            waitTime = 5,
+            leaseTime = 3
+    )
     public void deductStock(List<OrderCommand.Item> commands) {
         // 주문하려는 상품 ID들 추출
         List<Long> productIds = commands.stream()
                 .map(OrderCommand.Item::productId)
                 .collect(Collectors.toList());
 
-        // DB에서 재고 정보를 읽어옴 (PESSIMISTIC_WRITE)
         // 재고 정보 리스트
-        List<ProductStock> stocks = productRepository.findAllByIdsWithLock(productIds);
+        List<ProductStock> stocks = productRepository.findAllByProductIds(productIds);
 
         //주문 id 갯수 != 상품 조회 id 갯수
         if (stocks.size() != productIds.size()){
