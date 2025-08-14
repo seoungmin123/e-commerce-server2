@@ -2,6 +2,7 @@ package kr.hhplus.be.server.coupon.service;
 
 import kr.hhplus.be.server.common.exception.ApiErrorCode;
 import kr.hhplus.be.server.common.exception.ApiException;
+import kr.hhplus.be.server.common.redisson.DistributedLock;
 import kr.hhplus.be.server.coupon.domain.Coupon;
 import kr.hhplus.be.server.coupon.domain.CouponIssue;
 import kr.hhplus.be.server.coupon.domain.ICouponRepository;
@@ -25,11 +26,15 @@ import static kr.hhplus.be.server.common.exception.ApiErrorCode.NOT_FOUND;
 public class CouponService {
     private final ICouponRepository couponRepository;
 
-    // 쿠폰 발급  비관적 쓰기락 적용
     @Transactional
+    @DistributedLock(
+            topic = "coupon",
+            keyExpression = "#command.couponId",
+            waitTime = 5,
+            leaseTime = 3
+    )
     public CouponInfo issueCoupon(CouponCommand.Issue command) {
-        // DB에서 쿠폰 정보를 읽어옴 (PESSIMISTIC_WRITE)
-        Coupon coupon = couponRepository.findByIdWithLock(command.couponId()).orElseThrow(() -> new ApiException(NOT_FOUND));
+        Coupon coupon = couponRepository.findById(command.couponId()).orElseThrow(() -> new ApiException(NOT_FOUND));
 
         CouponIssue couponIssue = coupon.issue(command.user());
         try {

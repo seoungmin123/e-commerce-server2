@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.application.order;
 
 
+import kr.hhplus.be.server.common.redisson.DistributedLock;
 import kr.hhplus.be.server.coupon.dto.CouponDiscountInfo;
 import kr.hhplus.be.server.coupon.service.CouponService;
 import kr.hhplus.be.server.order.dto.OrderCommand;
@@ -29,6 +30,12 @@ public class OrderFacade {
 
     // 주문 파사드
     @Transactional
+    @DistributedLock(
+            topic = "stock",
+            keyExpression = "#criteria.toOptionIds()",
+            waitTime = 5,
+            leaseTime = 3
+    )
     public OrderResult order(OrderCriteria.Order criteria) {
         OrderCommand.Order orderCommand = criteria.toCommand();
 

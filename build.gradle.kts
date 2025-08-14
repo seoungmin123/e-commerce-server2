@@ -72,12 +72,22 @@ dependencies {
 	// Fixture Monkey
 	testImplementation("com.navercorp.fixturemonkey:fixture-monkey-starter:1.1.11")
 
+	// ShedLock
+	implementation("net.javacrumbs.shedlock:shedlock-spring:6.9.2")
+	implementation("net.javacrumbs.shedlock:shedlock-provider-redis-spring:6.9.2")
+
+	// Spring Data Redis
+	implementation("org.springframework.boot:spring-boot-starter-data-redis")
+
 	//redisson
 	implementation("org.redisson:redisson-spring-boot-starter:3.27.1")
 	testImplementation("com.redis:testcontainers-redis:2.2.2")
 
 	// Jetbrains Annotations
 	compileOnly("org.jetbrains:annotations:26.0.2")
+	// Jackson
+	implementation("com.fasterxml.jackson.core:jackson-databind:2.15.0")
+
 }
 
 tasks.withType<Test> {
