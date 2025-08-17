@@ -6,14 +6,13 @@ import kr.hhplus.be.server.common.redisson.DistributedLock;
 import kr.hhplus.be.server.order.domain.IOrderRepository;
 import kr.hhplus.be.server.order.dto.OrderCommand;
 import kr.hhplus.be.server.product.domain.IProductRepository;
+import kr.hhplus.be.server.product.domain.PopularProductCacheManager;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.product.domain.ProductStock;
 import kr.hhplus.be.server.product.dto.PopularProductInfo;
-import kr.hhplus.be.server.product.dto.PopularProductQuery;
 import kr.hhplus.be.server.product.dto.ProductInfo;
 import kr.hhplus.be.server.product.dto.ValidatedProductInfo;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import static kr.hhplus.be.server.common.exception.ApiErrorCode.NOT_FOUND;
@@ -32,6 +30,7 @@ public class ProductService {
 
     private final IProductRepository productRepository;
     private final IOrderRepository orderRepository;
+    private final PopularProductCacheManager popularProductCacheManager;
 
     // 상품 전체조회
     @Transactional(readOnly = true)
@@ -59,16 +58,24 @@ public class ProductService {
         }).toList();
     }
 
-    // 인기상품 조회 : 상위 5개
+/*
+    // 인기상품 조회 : 상위 5개 -> RedisCacheManager
     // 최근 3일 Top5 고정이므로 캐시 키는 상수
     @Transactional(readOnly = true)
-    @Cacheable(value = "popularTop5", key = "'v1:last3d'")
-    public List<PopularProductInfo> getTopFivePopularProducts() {
+    @Cacheable(value = "popularTop5", key = "'v1:last3d' ,sync = true ")
+    public List<PopularProductInfo> getTopFivePopularProducts_CacheManager() {
         List<PopularProductQuery> productQueries = orderRepository.findTopFivePopularProducts();
         AtomicLong rank = new AtomicLong(1);
         return productQueries.stream()
                 .map(query -> query.toInfo(rank.getAndIncrement()))
                 .toList();
+    }
+*/
+    // 인기상품 조회 : 상위 5개 -> RedisTemplte 사용
+    @Transactional(readOnly = true)
+    public List<PopularProductInfo> getTopFivePopularProducts() {
+        // 캐시에서만 조회 가능
+        return popularProductCacheManager.getTopProducts(5);
     }
 
     // 상품 유효성 검증

@@ -1,7 +1,12 @@
 package kr.hhplus.be.server.product.domain;
 
+import kr.hhplus.be.server.product.dto.PopularProductQuery;
+import org.springframework.data.redis.core.ZSetOperations;
+
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface IProductRepository {
     List<Product> findAll();
@@ -26,4 +31,32 @@ public interface IProductRepository {
     Optional<ProductStock> findByProductId(Long productId);
 
     List<ProductStock> findAllByProductIds(List<Long> productIds);
+
+    void addToTempKeys(List<PopularProductQuery> products);
+
+    String getCurrentSortedKey();
+
+    void moveKeys(String oldSortedKey, String newSortedKey, String oldHashKey, String newHashKey);
+
+    void deleteKeys(String... keys);
+
+    boolean existsKey(String key);
+
+    String getTempSortedKey();
+
+    String getBackupSortedKey();
+
+    String getTempHashKey();
+
+    String getCurrentHashKey();
+
+    String getBackupHashKey();
+
+    List<String> getProductHashValues(String hashKey, List<String> productIds);
+
+    Set<ZSetOperations.TypedTuple<Long>> getTopProductIds(String sortedKey, int limit);
+
+    boolean expire(String key, Duration ttl);
+
+    void expireBackupKeys(Duration ttl);
 }
