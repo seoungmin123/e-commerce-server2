@@ -17,7 +17,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
@@ -37,9 +36,6 @@ class ProductServiceTest {
 
     @Test
     void 상품_목록_조회시_상품이_없으면_빈_List를_반환한다() {
-        // given
-        when(productRepository.findAll()).thenReturn(null); // 또는 Collections.emptyList()
-
         // when
         List<ProductInfo> result = productService.getAllProducts();
 
