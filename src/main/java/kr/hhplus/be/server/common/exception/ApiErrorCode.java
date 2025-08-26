@@ -13,7 +13,8 @@ public enum ApiErrorCode {
     FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
     CONFLICT(HttpStatus.CONFLICT, "리소스 충돌이 발생했습니다."),
     INSUFFICIENT_STOCK(HttpStatus.CONFLICT, "재고가 부족합니다."),
-    INSUFFICIENT_COUPON(HttpStatus.CONFLICT, "쿠폰 수량이 부족합니다.");
+    INSUFFICIENT_COUPON(HttpStatus.CONFLICT, "쿠폰 수량이 부족합니다."),
+    LOCK_ACQUISITION_FAILED(HttpStatus.CONFLICT, "락 획득에 실패했습니다.");
 
 
     private final HttpStatus httpStatus;

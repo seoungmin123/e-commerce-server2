@@ -20,7 +20,19 @@ spring:
     properties:
       hibernate.timezone.default_storage: NORMALIZE_UTC
       hibernate.jdbc.time_zone: UTC
-      hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  redis:
+    redisson:
+      config:
+        singleServerConfig:
+          address: "redis://localhost:6379"
+          connectionMinimumIdleSize: 1
+          connectionPoolSize: 10
+          connectTimeout: 10000
+          timeout: 3000
 
 ---
 spring.config.activate.on-profile: local, test

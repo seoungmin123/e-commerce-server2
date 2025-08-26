@@ -15,6 +15,14 @@ services:
     #  - ./init/03-test-data.sql:/docker-entrypoint-initdb.d/03-test-data.sql
     #  - ./init/04-test_dummy.sql:/docker-entrypoint-initdb.d/04-test_dummy.sql
      # - ./init/05-product_popularity_dummy.sql:/docker-entrypoint-initdb.d/05-product_popularity_dummy.sql
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/data
+    command: redis-server --appendonly yes  # 데이터 지속성을 위한 AOF 설정
+
 networks:
   default:
     driver: bridge
