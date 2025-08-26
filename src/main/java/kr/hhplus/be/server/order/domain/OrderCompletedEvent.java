@@ -1,20 +1,18 @@
-package kr.hhplus.be.server.infra.external.order;
+package kr.hhplus.be.server.order.domain;
 
-
-import kr.hhplus.be.server.order.domain.Order;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public record OrderEvent(
+public record OrderCompletedEvent(
         Long orderId,
         Long userId,
         Long paymentId,
         BigDecimal amount,
         LocalDateTime paidAt
 ) {
-    public static OrderEvent from(Order order) {
-        return new OrderEvent(
+    public static OrderCompletedEvent from(Order order) {
+        return new OrderCompletedEvent(
                 order.getId(),
                 order.getUser().getId(),
                 order.getId(),
