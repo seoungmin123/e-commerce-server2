@@ -5,6 +5,9 @@ import kr.hhplus.be.server.DataBaseCleanUp;
 import kr.hhplus.be.server.ServerApplication;
 import kr.hhplus.be.server.common.exception.ApiErrorCode;
 import kr.hhplus.be.server.common.exception.ApiException;
+import kr.hhplus.be.server.coupon.domain.Coupon;
+import kr.hhplus.be.server.coupon.domain.CouponIssueProcessor;
+import kr.hhplus.be.server.coupon.domain.ICouponRepository;
 import kr.hhplus.be.server.coupon.dto.CouponCommand;
 import kr.hhplus.be.server.coupon.dto.CouponInfo;
 import kr.hhplus.be.server.coupon.service.CouponService;
@@ -16,6 +19,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
@@ -40,10 +45,21 @@ class CouponServiceIntegrationTest {
 
     @Autowired
     private DataBaseCleanUp dataBaseCleanUp;
+    @Autowired
+    private ICouponRepository couponRepository;
+    @Autowired
+    private CouponIssueProcessor couponIssueProcessor;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         dataBaseCleanUp.execute();
+        // Redis 데이터 초기화
+        redisTemplate.execute((RedisCallback<Object>) connection -> {
+            connection.flushDb();
+            return null;
+        });
     }
 
     @Test
@@ -146,5 +162,67 @@ class CouponServiceIntegrationTest {
         )
                 .isInstanceOf(ApiException.class)
                 .hasFieldOrPropertyWithValue("apiErrorCode", ApiErrorCode.CONFLICT);
+    }
+
+    @Test
+    void 쿠폰발급_요청시_성공하면_요청이력에_저장되고_발급이력에는_저장되지_않는다() {
+        // given
+        Long userId = 1L;
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("테스트 데이터가 없습니다."));
+        Long couponId = 5L;
+        CouponCommand.Issue command = new CouponCommand.Issue(user, couponId);
+
+        // when
+        boolean result = couponService.requestConponIssue(command);
+
+
+        // then
+        assertThat(result).isTrue();
+        assertThat(couponRepository.getRequestCount(couponId)).isEqualTo(1);
+        assertThat(couponRepository.isIssuedMember(couponId, userId)).isFalse();
+    }
+
+    @Test
+    void 동일_사용자가_여러번_요청시_한번만_요청이력에_저장된다() {
+        // given
+        Long userId = 1L;
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("테스트 데이터가 없습니다."));
+        Long couponId = 5L;
+        CouponCommand.Issue command = new CouponCommand.Issue(user, couponId);
+
+        // when
+        couponService.requestConponIssue(command);
+        couponService.requestConponIssue(command);
+        couponService.requestConponIssue(command);
+
+        // then
+        assertThat(couponRepository.getRequestCount(couponId)).isEqualTo(1);
+        assertThat(couponRepository.isIssuedMember(couponId, userId)).isFalse();
+    }
+
+    @Test
+    void 쿠폰발급_요청시_이미_발급받은_요청이면_CONFLICT_예외가_발생한다() {
+        // given
+        Long userId = 1L;
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("테스트 데이터가 없습니다."));
+        Long couponId = 5L;
+        Coupon coupon = couponRepository.findById(couponId)
+                .orElseThrow(() -> new RuntimeException("테스트 데이터가 없습니다."));
+        CouponCommand.Issue command = new CouponCommand.Issue(user, couponId);
+
+
+        // 먼저 한 번 요청 후 발급처리
+        couponService.requestConponIssue(command);
+        couponIssueProcessor.processCouponIssuance(coupon);
+
+        // when & then
+        assertThatThrownBy(() ->
+                couponService.requestConponIssue(command)
+        ).isInstanceOf(ApiException.class)
+                .hasFieldOrPropertyWithValue("apiErrorCode", ApiErrorCode.CONFLICT);
+        assertThat(couponRepository.getRequestCount(couponId)).isEqualTo(0); // 요청이력에 저장되지 않음
     }
 }

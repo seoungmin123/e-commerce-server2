@@ -4,7 +4,6 @@ import kr.hhplus.be.server.product.dto.PopularProductInfo;
 import java.math.BigDecimal;
 
 public record PopularProductResponse(
-        Long rank,
         Long productId,
         String name,
         BigDecimal price,
@@ -12,7 +11,6 @@ public record PopularProductResponse(
 ) {
     public static PopularProductResponse from(PopularProductInfo popularProductInfo) {
         return new PopularProductResponse(
-                popularProductInfo.rank(),
                 popularProductInfo.productId(),
                 popularProductInfo.name(),
                 popularProductInfo.price(),

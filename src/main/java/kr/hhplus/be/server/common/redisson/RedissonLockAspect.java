@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.common.redisson;
 
 
+import kr.hhplus.be.server.common.exception.ApiException;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
@@ -25,6 +26,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static kr.hhplus.be.server.common.exception.ApiErrorCode.LOCK_ACQUISITION_FAILED;
+
 @Aspect
 @Component
 @RequiredArgsConstructor
@@ -32,7 +35,6 @@ import java.util.regex.Pattern;
 public class RedissonLockAspect {
 
     private final RedissonClient redissonClient;
-
     private final SPelEvaluator spelEvaluator;
 
     @Around("@annotation(DistributedLock)")
@@ -100,7 +102,7 @@ public class RedissonLockAspect {
             available = multiLock.tryLock(waitTime, leaseTime, unit);
 
             if (!available) {
-                throw new IllegalStateException("락 획득 실패 - ids: " + ids);
+                throw new ApiException(LOCK_ACQUISITION_FAILED);
             }
 
             // 12. 락이 획득되면 실제 메서드를 실행

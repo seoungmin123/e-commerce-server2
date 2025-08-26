@@ -78,6 +78,8 @@ dependencies {
 
 	// Spring Data Redis
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
+	implementation("net.javacrumbs.shedlock:shedlock-spring:5.5.0")
+	implementation("net.javacrumbs.shedlock:shedlock-provider-redis-spring:5.5.0")
 
 	//redisson
 	implementation("org.redisson:redisson-spring-boot-starter:3.27.1")

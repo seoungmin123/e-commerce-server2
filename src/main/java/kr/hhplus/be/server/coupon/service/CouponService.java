@@ -45,6 +45,19 @@ public class CouponService {
         return CouponInfo.from(couponIssue);
     }
 
+    @Transactional
+    public boolean requestConponIssue(CouponCommand.Issue command) {
+        Coupon coupon = couponRepository.findById(command.couponId()).orElseThrow(() -> new ApiException(NOT_FOUND));
+        coupon.validateIssuable();
+
+        if (couponRepository.isIssuedMember(command.couponId(), command.user().getId())) {
+            throw new ApiException(ApiErrorCode.CONFLICT);
+        }
+
+        return couponRepository.addRequest(command.couponId(), command.user().getId());
+    }
+
+
     //쿠폰 조회 목록
     @Transactional(readOnly = true)
     public List<CouponInfo> getCoupons(User user) {
