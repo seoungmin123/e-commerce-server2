@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.infra.external.order;
+package kr.hhplus.be.server.infra.dataplatform;
 
 
 import lombok.extern.slf4j.Slf4j;
@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class ExternalOrderSender {
+public class DataPlatformClient {
 
     public void send(String event) {
         // 단순 로그 출력
