@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.application.order;
 
 
-import kr.hhplus.be.server.order.dto.OrderInfo;
+import kr.hhplus.be.server.domain.order.dto.OrderInfo;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

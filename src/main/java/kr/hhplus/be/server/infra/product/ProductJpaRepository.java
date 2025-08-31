@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.infra.product;
 
 
-import kr.hhplus.be.server.product.domain.Product;
+import kr.hhplus.be.server.domain.product.domain.Product;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.infra.product;
 
-import kr.hhplus.be.server.product.domain.PopularProductCacheManager;
+import kr.hhplus.be.server.domain.product.domain.PopularProductCacheManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

@@ -1,10 +1,10 @@
 package kr.hhplus.be.server.infra.coupon;
 
 
-import kr.hhplus.be.server.coupon.domain.Coupon;
-import kr.hhplus.be.server.coupon.domain.CouponIssue;
-import kr.hhplus.be.server.coupon.domain.ICouponRepository;
-import kr.hhplus.be.server.user.domain.User;
+import kr.hhplus.be.server.domain.coupon.domain.Coupon;
+import kr.hhplus.be.server.domain.coupon.domain.CouponIssue;
+import kr.hhplus.be.server.domain.coupon.domain.ICouponRepository;
+import kr.hhplus.be.server.domain.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Repository;

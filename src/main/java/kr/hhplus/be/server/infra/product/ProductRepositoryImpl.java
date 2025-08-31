@@ -1,10 +1,10 @@
 package kr.hhplus.be.server.infra.product;
 
 
-import kr.hhplus.be.server.product.domain.IProductRepository;
-import kr.hhplus.be.server.product.domain.Product;
-import kr.hhplus.be.server.product.domain.ProductStock;
-import kr.hhplus.be.server.product.dto.PopularProductQuery;
+import kr.hhplus.be.server.domain.product.domain.IProductRepository;
+import kr.hhplus.be.server.domain.product.domain.Product;
+import kr.hhplus.be.server.domain.product.domain.ProductStock;
+import kr.hhplus.be.server.domain.product.dto.PopularProductQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Repository;

@@ -1,8 +1,8 @@
 package kr.hhplus.be.server.application.order;
 
 
-import kr.hhplus.be.server.order.dto.OrderCommand;
-import kr.hhplus.be.server.user.domain.User;
+import kr.hhplus.be.server.domain.order.dto.OrderCommand;
+import kr.hhplus.be.server.domain.user.domain.User;
 
 import java.util.List;
 

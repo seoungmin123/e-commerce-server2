@@ -1,9 +1,9 @@
 package kr.hhplus.be.server.infra.point;
 
 
-import kr.hhplus.be.server.point.domain.IPointRepository;
-import kr.hhplus.be.server.point.domain.Point;
-import kr.hhplus.be.server.user.domain.User;
+import kr.hhplus.be.server.domain.point.domain.IPointRepository;
+import kr.hhplus.be.server.domain.point.domain.Point;
+import kr.hhplus.be.server.domain.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
