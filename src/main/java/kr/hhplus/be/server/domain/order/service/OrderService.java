@@ -4,7 +4,7 @@ package kr.hhplus.be.server.domain.order.service;
 import kr.hhplus.be.server.common.exception.ApiException;
 import kr.hhplus.be.server.domain.order.domain.IOrderRepository;
 import kr.hhplus.be.server.domain.order.domain.Order;
-import kr.hhplus.be.server.domain.order.domain.OrderCompletedEvent;
+import kr.hhplus.be.server.domain.order.domain.OrderEvent;
 import kr.hhplus.be.server.domain.order.domain.OrderItem;
 import kr.hhplus.be.server.domain.order.dto.OrderCommand;
 import kr.hhplus.be.server.domain.order.dto.OrderInfo;
@@ -44,7 +44,7 @@ public class OrderService {
         Order order = orderRepository.findById(command.orderId()).orElseThrow(() -> new ApiException(NOT_FOUND));
         order.confirm();
         //외부전송 이벤트
-        eventPublisher.publishEvent(OrderCompletedEvent.from(order));
+        eventPublisher.publishEvent(OrderEvent.Completed.from(order));
         return OrderInfo.from(order);
     }
 
