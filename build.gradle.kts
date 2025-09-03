@@ -85,7 +85,11 @@ dependencies {
 	implementation("org.redisson:redisson-spring-boot-starter:3.27.1")
 	testImplementation("com.redis:testcontainers-redis:2.2.2")
 
-	// Jetbrains Annotations
+    // kafka
+    implementation("org.springframework.kafka:spring-kafka")
+    testImplementation("org.testcontainers:kafka:1.19.3")
+
+    // Jetbrains Annotations
 	compileOnly("org.jetbrains:annotations:26.0.2")
 	// Jackson
 	implementation("com.fasterxml.jackson.core:jackson-databind:2.15.0")
