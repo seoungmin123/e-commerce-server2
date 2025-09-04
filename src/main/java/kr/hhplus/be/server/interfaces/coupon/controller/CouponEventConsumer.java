@@ -1,6 +1,5 @@
 package kr.hhplus.be.server.interfaces.coupon.controller;
 
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;

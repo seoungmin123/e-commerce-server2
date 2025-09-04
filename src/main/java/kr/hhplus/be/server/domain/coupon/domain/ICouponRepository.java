@@ -31,11 +31,18 @@ public interface ICouponRepository {
 
     int getRequestCount(Long id);
 
-    void addIssuance(Long id, List<Long> successfulUserIds);
+    void addIssuedCoupon(Long id, List<Long> userIds);
+
+    void addIssuedCoupon(Long id, Long userId);
 
     void addFailures(Long id, List<Long> failedUserIds);
 
     int getIssuedCount(Long id);
 
     int getFailedCount(Long id);
+
+    void saveAll(List<Coupon> couponList);
+
+    void saveAllCouponissues(List<CouponIssue> couponIssueList);
+
 }
