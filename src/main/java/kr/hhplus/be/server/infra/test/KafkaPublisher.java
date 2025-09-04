@@ -14,7 +14,7 @@ public class KafkaPublisher {
 
     public void publish(String topic, String message) {
         kafkaTemplate.send(topic, message);
-        log.info("메시지 발행: {}", message);
+        log.info("메시지 발행: {} ", message);
     }
 
 }

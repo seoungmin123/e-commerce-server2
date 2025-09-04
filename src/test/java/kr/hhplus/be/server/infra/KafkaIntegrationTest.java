@@ -2,6 +2,7 @@ package kr.hhplus.be.server.infra;
 
 
 import kr.hhplus.be.server.infra.test.KafkaPublisher;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,6 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.Assert.assertTrue;
 
 @SpringBootTest
 @ExtendWith(OutputCaptureExtension.class)
@@ -29,11 +29,10 @@ class KafkaIntegrationTest {
         kafkaPublisher.publish("test-topic", message);
 
         // then : log.info 출력 확인
-        await()
-                .atMost(5, TimeUnit.SECONDS)
+        await().atMost(5, TimeUnit.SECONDS)
                 .untilAsserted(() -> {
-                    assertTrue(output.toString().contains("메시지 발행: " + message));
-                    assertTrue(output.toString().contains("메시지 수신: " + message));
+                    Assertions.assertTrue(output.toString().contains("메시지 발행: " + message));
+                    Assertions.assertTrue(output.toString().contains("메시지 수신: " + message));
                 });
     }
 }
