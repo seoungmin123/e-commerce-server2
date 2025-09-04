@@ -1,15 +1,12 @@
 package kr.hhplus.be.server.domain.order.domain;
 
-
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.support.BaseEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
-
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Entity

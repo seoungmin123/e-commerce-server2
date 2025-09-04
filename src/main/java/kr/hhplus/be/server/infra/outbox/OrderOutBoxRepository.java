@@ -27,7 +27,7 @@ public class OrderOutBoxRepository {
 
             return orderOutBoxJpaRepository.save(outbox);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Json 변환 실패: " + event.eventType(), e);
+            throw new RuntimeException("Json 변환 실패 : " + event.eventType(), e);
         }
     }
 

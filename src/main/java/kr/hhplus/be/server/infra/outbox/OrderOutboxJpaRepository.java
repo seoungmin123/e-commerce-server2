@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrderOutboxJpaRepository  extends JpaRepository<OrderOutbox, Long> {
+
     Optional<OrderOutbox> findByOrderId(Long orderId);
 
     List<OrderOutbox> findAllByEventTypeAndStatus(String eventType, OrderOutbox.OutboxStatus status);
