@@ -37,7 +37,7 @@ public class CouponController implements CouponSwaggerDocs {
     @PostMapping("/{couponId}/issue-requests")
     public ResponseEntity<ResultResponse>  requestCouponIssue(@RequestBody User user,
                                                               @PathVariable Long couponId) {
-        boolean result = couponService.requestConponIssue(new CouponCommand.Issue(user, couponId));
+        boolean result = couponService.enqueue(new CouponCommand.Issue(user, couponId));
         return ResponseEntity.ok(result ? ResultResponse.success() : ResultResponse.fail("쿠폰 발급 요청에 실패했습니다."));
     }
 

@@ -48,7 +48,7 @@ public class CouponIssueProcessor {
         requests.forEach(request ->
                 userRepository.findById(request.getValue()).ifPresent(user -> {
                     try {
-                        coupon.issueAt(user, convertToLocalDateTime(request.getScore()));
+                        coupon.issue(user, convertToLocalDateTime(request.getScore()));
                         result.addSuccess(user.getId());
                     } catch (Exception e) {
                         log.error("Failed to issue coupon for user: {}", user.getId(), e);
@@ -62,7 +62,7 @@ public class CouponIssueProcessor {
 
     private void saveResults(Long couponId, IssuanceResult result, int processedCount) {
         if (!result.getSuccessfulUserIds().isEmpty()) {
-            couponRepository.addIssuance(couponId, result.getSuccessfulUserIds());
+            couponRepository.addIssuedCoupon(couponId, result.getSuccessfulUserIds());
             couponRepository.removeRequests(couponId, processedCount);
         }
         if (!result.getFailedUserIds().isEmpty()) {

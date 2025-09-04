@@ -2,6 +2,7 @@ package kr.hhplus.be.server.domain.coupon.domain;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import kr.hhplus.be.server.domain.support.BaseEntity;
 import kr.hhplus.be.server.common.exception.ApiException;
 import kr.hhplus.be.server.domain.user.domain.User;
@@ -48,6 +49,7 @@ public class Coupon extends BaseEntity {
     private Integer totalIssueQuantity;
 
     @Column(name = "issued_quantity", nullable = false)
+    @NotNull
     private Integer issuedQuantity = 0;
 
     private Coupon(String name, DiscountType discountType, BigDecimal discountValue,
@@ -78,14 +80,15 @@ public class Coupon extends BaseEntity {
         return couponIssue;
     }
 
-    public CouponIssue issueAt(User user, LocalDateTime requestTime) {
-        validateIssuableAt(requestTime);
+
+    public CouponIssue issue(User user, LocalDateTime requestTime) {
+        validateIssuable(requestTime);
         this.issuedQuantity++;
         CouponIssue couponIssue = CouponIssue.create(user, this);
         return couponIssue;
     }
 
-    public void validateIssuableAt(LocalDateTime requestTime) {
+    public void validateIssuable(LocalDateTime requestTime) {
         // 요청 시점이 발급 기간 내인지 확인
         if (requestTime.isBefore(issueStartAt) || requestTime.isAfter(issueEndAt)) {
             throw new ApiException(INVALID_REQUEST);
@@ -98,7 +101,7 @@ public class Coupon extends BaseEntity {
     }
 
     public void validateIssuable() {
-        validateIssuableAt(LocalDateTime.now());
+        validateIssuable(LocalDateTime.now());
     }
 
     public enum DiscountType {

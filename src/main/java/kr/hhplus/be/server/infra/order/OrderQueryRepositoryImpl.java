@@ -9,8 +9,8 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static kr.hhplus.be.server.order.domain.QOrderItem.orderItem;
-import static kr.hhplus.be.server.product.domain.QProduct.product;
+import static kr.hhplus.be.server.domain.order.domain.QOrderItem.orderItem;
+import static kr.hhplus.be.server.domain.product.domain.QProduct.product;
 
 @Repository
 @RequiredArgsConstructor
