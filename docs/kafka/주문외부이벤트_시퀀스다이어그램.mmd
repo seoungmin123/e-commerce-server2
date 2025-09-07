@@ -1,0 +1,44 @@
+sequenceDiagram
+    participant Client as Client
+    participant OS as OrderService
+    participant AEP as ApplicationEventPublisher
+    participant OOH as OrderOutboxHandler
+    participant OOR as OrderOutboxRepository
+    participant OEP as OrderEventPublisher
+    participant Kafka as Kafka Broker
+    participant OEC as OrderEventConsumer
+    participant Scheduler as OrderScheduler
+
+    %% 주문 확정 플로우
+    Client->>OS: confirm(orderId)
+    OS->>OS: order.confirm()
+    OS->>AEP: publishEvent(OrderEvent.Completed)
+
+    %% 트랜잭션 커밋 전 - 아웃박스 저장
+    AEP->>OOH: @TransactionalEventListener(BEFORE_COMMIT)<br/>saveToOutbox(event)
+    OOH->>OOR: save(event)
+
+    Note over OS: 트랜잭션 커밋
+
+    %% 트랜잭션 커밋 후 - 카프카 발행
+    AEP->>OOH: @TransactionalEventListener(AFTER_COMMIT)<br/>handleOrderCompletedEvent(event)
+    OOH->>OEP: publish("order-completed", event)
+    OEP->>Kafka: send(topic, message)
+
+    %% 자기 자신이 소비
+    Kafka->>OEC: @KafkaListener("order-completed")
+    OEC->>OOR: findByOrderId(orderId).published()
+
+    OS->>Client: OrderInfo 반환
+
+    %% 스케줄러 - 실패한 이벤트 재발행
+    Note over Scheduler: 60초마다 실행
+    Scheduler->>OOR: findUnpublishedEvents("Completed")
+    loop 미발행 이벤트들
+        Scheduler->>OEP: publish("order-completed", payload)
+        OEP->>Kafka: send(topic, message)
+        alt 발행 실패시
+            Scheduler->>Scheduler: incrementRetryCount()
+            Scheduler->>OOR: saveAll(failedEvents)
+        end
+    end

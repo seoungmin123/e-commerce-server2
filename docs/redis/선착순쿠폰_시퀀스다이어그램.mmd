@@ -1,0 +1,98 @@
+sequenceDiagram
+    participant User as 사용자
+    participant Controller as CouponController
+    participant Service as CouponService
+    participant Repository as CouponRepositoryImpl
+    participant Cache as CouponCacheRepository
+    participant Redis as Redis
+    participant DB as Database
+    participant Scheduler as CouponScheduler
+    participant Processor as CouponIssueProcessor
+    participant Lock as DistributedLock
+
+    Note over User, Lock: 1. 쿠폰 발급 요청 단계
+    User->>Controller: POST /coupons/{id}/issue-requests
+    Controller->>Service: requestCouponIssue(CouponCommand.Issue)
+    Service->>Repository: findById(couponId)
+    Repository->>DB: SELECT * FROM coupon WHERE id = ?
+    DB-->>Repository: Coupon
+    Repository-->>Service: Coupon
+    Service->>Service: coupon.validateIssuable() - 발급 가능 검증
+    Service->>Repository: isIssuedMember(couponId, userId)
+    Repository->>Cache: isMember(couponId, userId)
+    Cache->>Redis: SISMEMBER coupon:{id}:issued {userId}
+    Redis-->>Cache: false (미발급 확인)
+    Cache-->>Repository: false
+    Repository-->>Service: false
+    Service->>Repository: addRequest(couponId, userId)
+    Repository->>Cache: addRequest(couponId, userId)
+    Cache->>Redis: ZADD coupon:{id}:requests {timestamp} {userId}
+    Redis-->>Cache: 1 (성공)
+    Cache-->>Repository: true
+    Repository-->>Service: true
+    Service-->>Controller: true
+    Controller-->>User: 요청 성공 응답
+
+    Note over Scheduler, Lock: 2. 스케줄러 주기적 처리 (매 1분)
+    Scheduler->>Repository: findIssuableCoupons(now-1분)
+    Repository->>DB: SELECT * FROM coupon WHERE issue_start_at <= ? AND issue_end_at >= ?
+    DB-->>Repository: List<Coupon>
+    Repository-->>Scheduler: List<Coupon>
+
+    loop 각 쿠폰마다
+        Scheduler->>Processor: processCouponIssuance(coupon)
+
+        Note over Processor, Redis: 3. 대기열에서 선착순 사용자 조회
+        Processor->>Repository: getRequestsByTimestamp(couponId, issuableCount)
+        Repository->>Cache: getRequestsByTimestamp(couponId, limit)
+        Cache->>Redis: ZRANGE coupon:{id}:requests 0 {limit-1} WITHSCORES
+        Redis-->>Cache: [(userId1, timestamp1), (userId2, timestamp2)...]
+        Cache-->>Repository: Set<TypedTuple<Long>>
+        Repository-->>Processor: 타임스탬프 순 정렬된 사용자 목록
+
+        Note over Processor, DB: 4. 배치 쿠폰 발급 처리
+        loop 각 사용자마다
+            Processor->>Repository: findById(userId) - User 조회
+            Repository->>DB: SELECT * FROM user WHERE id = ?
+            DB-->>Repository: User
+            Repository-->>Processor: User
+            Processor->>Processor: coupon.issueAt(user, requestTime) - 쿠폰 발급
+            Note right of Processor: coupon.issuedQuantity++ (메모리에서)
+        end
+
+        Note over Processor, Redis: 5. 처리 결과 캐시 저장
+        Processor->>Repository: addIssuance(couponId, successfulUserIds)
+        Repository->>Cache: addIssuance(couponId, userIds)
+        Cache->>Redis: PIPELINE: SADD coupon:{id}:issued {userId1} {userId2}...
+        Redis-->>Cache: OK
+
+        Processor->>Repository: removeRequests(couponId, processedCount)
+        Repository->>Cache: removeRequests(couponId, limit)
+        Cache->>Redis: ZREMRANGEBYRANK coupon:{id}:requests 0 {limit-1}
+        Redis-->>Cache: OK
+
+        opt 실패한 사용자가 있는 경우
+            Processor->>Repository: addFailures(couponId, failedUserIds)
+            Repository->>Cache: addFailures(couponId, failedUserIds)
+            Cache->>Redis: PIPELINE: SADD coupon:{id}:failed {userId}...
+            Redis-->>Cache: OK
+        end
+    end
+
+    Note over User, Lock: 6. 즉시 쿠폰 발급 (동기 처리)
+    User->>Controller: POST /coupons/{id}/issue
+    Controller->>Service: issueCoupon(CouponCommand.Issue)
+    Note over Service, Lock: Redisson 분산락 적용
+    Lock->>Redis: LOCK coupon:{couponId}
+    Service->>Repository: findById(couponId)
+    Repository->>DB: SELECT * FROM coupon WHERE id = ?
+    DB-->>Repository: Coupon
+    Repository-->>Service: Coupon
+    Service->>Service: coupon.issue(user) - 쿠폰 발급
+    Service->>Repository: save(couponIssue)
+    Repository->>DB: INSERT INTO coupon_issue...
+    DB-->>Repository: CouponIssue
+    Repository-->>Service: CouponIssue
+    Lock->>Redis: UNLOCK coupon:{couponId}
+    Service-->>Controller: CouponInfo
+    Controller-->>User: 발급 완료 응답
