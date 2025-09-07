@@ -1,8 +1,8 @@
 package kr.hhplus.be.server.infra.user;
 
 
-import kr.hhplus.be.server.user.domain.IUserRepository;
-import kr.hhplus.be.server.user.domain.User;
+import kr.hhplus.be.server.domain.user.domain.IUserRepository;
+import kr.hhplus.be.server.domain.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 

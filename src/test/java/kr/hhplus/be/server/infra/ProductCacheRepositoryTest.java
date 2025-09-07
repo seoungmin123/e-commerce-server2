@@ -2,8 +2,8 @@ package kr.hhplus.be.server.infra;
 
 
 import kr.hhplus.be.server.infra.product.ProductCacheRepository;
-import kr.hhplus.be.server.product.dto.PopularProductInfo;
-import kr.hhplus.be.server.product.dto.PopularProductQuery;
+import kr.hhplus.be.server.domain.product.dto.PopularProductInfo;
+import kr.hhplus.be.server.domain.product.dto.PopularProductQuery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

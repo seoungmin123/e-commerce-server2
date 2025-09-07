@@ -2,7 +2,7 @@ package kr.hhplus.be.server.infra.product;
 
 
 import jakarta.persistence.LockModeType;
-import kr.hhplus.be.server.product.domain.ProductStock;
+import kr.hhplus.be.server.domain.product.domain.ProductStock;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;

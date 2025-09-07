@@ -1,0 +1,71 @@
+sequenceDiagram
+    participant User as 사용자
+    participant Controller as CouponController
+    participant Service as CouponService
+    participant EventPublisher as ApplicationEventPublisher
+    participant Listener as CouponEventListener
+    participant OutboxRepo as CouponOutboxRepository
+    participant KafkaPublisher as CouponEventPublisher
+    participant Repository as CouponRepository
+    participant Cache as Redis Cache
+    participant Scheduler as CouponScheduler
+    participant Processor as CouponIssueProcessor
+    participant Consumer as CouponEventConsumer
+
+    Note over User, Consumer: 1. 쿠폰 발급 요청 단계
+    User->>Controller: POST /coupons/{id}/issue-requests
+    Controller->>Service: enqueue(CouponCommand.Issue)
+    Service->>Repository: findById(couponId) - 쿠폰 존재 확인
+    Repository-->>Service: Coupon
+    Service->>EventPublisher: publishEvent(CouponEvent.Issue)
+
+    Note over EventPublisher, OutboxRepo: 2. 이벤트 처리 단계 (트랜잭션 내)
+    EventPublisher->>Listener: saveToOutbox(event) - BEFORE_COMMIT
+    Listener->>OutboxRepo: save(event) - 아웃박스에 저장
+
+    Note over EventPublisher, KafkaPublisher: 3. 메시지 발행 단계 (트랜잭션 커밋 후)
+    EventPublisher->>Listener: handleOrderCompletedEvent(event) - AFTER_COMMIT
+    Listener->>KafkaPublisher: publish("coupon-issue", event)
+    KafkaPublisher->>KafkaPublisher: 카프카로 메시지 전송
+
+    Service-->>Controller: true
+    Controller-->>User: 요청 성공 응답
+
+    Note over Scheduler, Cache: 4. 스케줄러를 통한 대기열 처리 (매 1분)
+    Scheduler->>Repository: findIssuableCoupons(now-1분)
+    Repository-->>Scheduler: List<Coupon>
+
+    loop 각 쿠폰마다
+        Scheduler->>Processor: processCouponIssuance(coupon)
+        Processor->>Cache: getRequestsByTimestamp(couponId, issuableCount)
+        Cache-->>Processor: 대기열에서 선착순 사용자 목록
+
+        loop 각 사용자마다
+            Processor->>Repository: findById(userId)
+            Repository-->>Processor: User
+            Processor->>Processor: coupon.issue(user) - 쿠폰 발급 로직
+        end
+
+        Processor->>Cache: addIssuedCoupon(성공한 사용자들)
+        Processor->>Cache: removeRequests(처리된 요청들)
+        Processor->>Cache: addFailures(실패한 사용자들)
+    end
+
+    Note over Consumer, Repository: 5. 카프카 컨슈머를 통한 실제 발급 처리
+    Consumer->>OutboxRepo: findUnpublishedEvents("Issue")
+    OutboxRepo-->>Consumer: 미처리 아웃박스 이벤트들
+
+    Consumer->>Consumer: 수신된 메시지들을 배치 처리
+
+    loop 각 메시지마다
+        Consumer->>Consumer: findMatchingOutbox(message)
+        Consumer->>Repository: findById(couponId)
+        Consumer->>Repository: findById(userId)
+        Consumer->>Repository: isIssuedMember(중복 확인)
+        Consumer->>Consumer: coupon.issue(user) - 실제 쿠폰 발급
+        Consumer->>Consumer: outbox.published() - 아웃박스 상태 변경
+    end
+
+    Consumer->>Repository: saveAllCouponissues(발급된 쿠폰들)
+    Consumer->>Cache: addIssuedCoupon(발급 이력 캐시 저장)
+    Consumer->>OutboxRepo: saveAll(업데이트된 아웃박스들)

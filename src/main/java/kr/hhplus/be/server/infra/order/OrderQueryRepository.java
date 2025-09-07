@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.infra.order;
 
 
-import kr.hhplus.be.server.product.dto.PopularProductQuery;
+import kr.hhplus.be.server.domain.product.dto.PopularProductQuery;
 
 import java.util.List;
 

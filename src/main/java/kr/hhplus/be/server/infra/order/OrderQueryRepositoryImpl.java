@@ -2,15 +2,15 @@ package kr.hhplus.be.server.infra.order;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import kr.hhplus.be.server.product.dto.PopularProductQuery;
+import kr.hhplus.be.server.domain.product.dto.PopularProductQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static kr.hhplus.be.server.order.domain.QOrderItem.orderItem;
-import static kr.hhplus.be.server.product.domain.QProduct.product;
+import static kr.hhplus.be.server.domain.order.domain.QOrderItem.orderItem;
+import static kr.hhplus.be.server.domain.product.domain.QProduct.product;
 
 @Repository
 @RequiredArgsConstructor

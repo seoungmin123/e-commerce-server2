@@ -46,7 +46,13 @@ public class CouponCacheRepository {
     }
 
 
-    public void addIssuance(Long couponId, List<Long> userIds) {
+    public void addIssuedCoupon(Long couponId, Long userIds) {
+        String issuedKey = String.format(ISSUED_KEY_FORMAT, couponId);
+        redisTemplate.opsForSet().add(issuedKey, userIds);
+    }
+
+
+    public void addIssuedCoupon(Long couponId, List<Long> userIds) {
         if (userIds.isEmpty()) {
             return;
         }
