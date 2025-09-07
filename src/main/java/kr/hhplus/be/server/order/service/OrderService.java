@@ -4,10 +4,12 @@ package kr.hhplus.be.server.order.service;
 import kr.hhplus.be.server.common.exception.ApiException;
 import kr.hhplus.be.server.order.domain.IOrderRepository;
 import kr.hhplus.be.server.order.domain.Order;
+import kr.hhplus.be.server.order.domain.OrderCompletedEvent;
 import kr.hhplus.be.server.order.domain.OrderItem;
 import kr.hhplus.be.server.order.dto.OrderCommand;
 import kr.hhplus.be.server.order.dto.OrderInfo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,8 @@ import static kr.hhplus.be.server.common.exception.ApiErrorCode.NOT_FOUND;
 @RequiredArgsConstructor
 public class OrderService {
     private final IOrderRepository orderRepository;
+    private final ApplicationEventPublisher eventPublisher;
+
 
     @Transactional
     public OrderInfo order(OrderCommand.Order command) {
@@ -39,6 +43,8 @@ public class OrderService {
     public OrderInfo confirm(OrderCommand.Confirm command) {
         Order order = orderRepository.findById(command.orderId()).orElseThrow(() -> new ApiException(NOT_FOUND));
         order.confirm();
+        //외부전송 이벤트
+        eventPublisher.publishEvent(OrderCompletedEvent.from(order));
         return OrderInfo.from(order);
     }
 
