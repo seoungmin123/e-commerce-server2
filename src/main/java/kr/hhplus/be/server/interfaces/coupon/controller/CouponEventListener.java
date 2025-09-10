@@ -2,6 +2,7 @@ package kr.hhplus.be.server.interfaces.coupon.controller;
 
 
 import kr.hhplus.be.server.domain.coupon.domain.CouponEvent;
+import kr.hhplus.be.server.domain.coupon.domain.CouponOutbox;
 import kr.hhplus.be.server.infra.coupon.CouponEventPublisher;
 import kr.hhplus.be.server.infra.outbox.CouponOutboxRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,12 +22,16 @@ public class CouponEventListener {
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void saveToOutbox(CouponEvent.Issue event) {
-        couponOutboxRepository.save(event);
+        CouponOutbox outbox = couponOutboxRepository.save(event);
+        log.info("쿠폰 이벤트 Outbox 저장: outboxId={}, couponId={}, userId={}",
+                outbox.getId(), event.couponId(), event.userId());
     }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleOrderCompletedEvent(CouponEvent.Issue event) {
-        eventPublisher.publish("coupon-issue", event);
+        log.info("쿠폰 이벤트 발행 시작: couponId={}, userId={}", event.couponId(), event.userId());
+        eventPublisher.publishV1("coupon-issue", event);
+        log.info("쿠폰 이벤트 발행 완료: couponId={}, userId={}", event.couponId(), event.userId());
     }
 }

@@ -4,13 +4,13 @@ import kr.hhplus.be.server.common.exception.ApiErrorCode;
 import kr.hhplus.be.server.common.exception.ApiException;
 import kr.hhplus.be.server.common.redisson.DistributedLock;
 import kr.hhplus.be.server.domain.coupon.domain.Coupon;
-import kr.hhplus.be.server.domain.coupon.domain.CouponEvent;
 import kr.hhplus.be.server.domain.coupon.domain.CouponIssue;
 import kr.hhplus.be.server.domain.coupon.domain.ICouponRepository;
 import kr.hhplus.be.server.domain.coupon.dto.CouponCommand;
 import kr.hhplus.be.server.domain.coupon.dto.CouponDiscountInfo;
 import kr.hhplus.be.server.domain.coupon.dto.CouponInfo;
 import kr.hhplus.be.server.domain.user.domain.User;
+import kr.hhplus.be.server.infra.coupon.CouponEventPublisherV1;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -27,6 +27,7 @@ import static kr.hhplus.be.server.common.exception.ApiErrorCode.NOT_FOUND;
 @RequiredArgsConstructor
 public class CouponService {
     private final ICouponRepository couponRepository;
+    private final CouponEventPublisherV1 eventPublisher;
     private final ApplicationEventPublisher couponEventPublisher;
 
     @Transactional
@@ -61,9 +62,10 @@ public class CouponService {
     }
 
     @Transactional
-    public boolean enqueue(CouponCommand.Issue command) {
-        couponRepository.findById(command.couponId()).orElseThrow(() -> new ApiException(NOT_FOUND));
-        couponEventPublisher.publishEvent(CouponEvent.Issue.of(command.couponId(), command.user().getId()));
+    public boolean enqueue(CouponCommand.IssueCouponForKafka command) {
+//        couponRepository.findById(command.couponId()).orElseThrow(() -> new ApiException(NOT_FOUND));
+
+        eventPublisher.publish("coupon-issue", command);
         return true;
     }
 

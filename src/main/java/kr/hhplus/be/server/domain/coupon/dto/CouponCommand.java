@@ -3,11 +3,14 @@ package kr.hhplus.be.server.domain.coupon.dto;
 import kr.hhplus.be.server.domain.user.domain.User;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public class CouponCommand {
     //쿠폰 발급 커맨드
     public record Issue(User user, Long couponId) {
     }
+
+    public record IssueCouponForKafka(Long userId, Long couponId, LocalDateTime createdAt) {}
 
     //쿠폰 사용 커맨드
     public record Use(User user, Long couponIssueId, BigDecimal paymentAmount) {
