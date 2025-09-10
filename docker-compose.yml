@@ -1,5 +1,38 @@
 version: '3'
 services:
+#  spring:
+#    container_name: spring
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8088:8080"  # 호스트 8088 -> 컨테이너 8080
+#    environment:
+#      - SPRING_PROFILES_ACTIVE=load-test
+#      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/hhplus?characterEncoding=UTF-8&serverTimezone=UTC
+#      - SPRING_DATASOURCE_USERNAME=application
+#      - SPRING_DATASOURCE_PASSWORD=application
+#      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+#      - SPRING_DATA_REDIS_HOST=r애edis
+#      - SPRING_DATA_REDIS_PORT=6379
+#      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka-1:29092,kafka-2:29094,kafka-3:29096
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '2.0'
+#          memory: 2048M
+#        reservations:
+#          cpus: '2.0'
+#          memory: 2048M
+#    depends_on:
+#      mysql:
+#        condition: service_healthy
+#      redis:
+#        condition: service_healthy
+#    networks:
+#      - default
+#      - kafka-net
+
   mysql:
     image: mysql:8.0
     ports:
@@ -11,10 +44,12 @@ services:
       - MYSQL_DATABASE=hhplus
     volumes:
       - ./data/mysql/:/var/lib/mysql
-   #   - ./init/02-init.sql:/docker-entrypoint-initdb.d/02-init.sql
-    #  - ./init/03-test-data.sql:/docker-entrypoint-initdb.d/03-test-data.sql
-    #  - ./init/04-test_dummy.sql:/docker-entrypoint-initdb.d/04-test_dummy.sql
-     # - ./init/05-product_popularity_dummy.sql:/docker-entrypoint-initdb.d/05-product_popularity_dummy.sql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   redis:
     image: redis:latest
     ports:
@@ -22,7 +57,53 @@ services:
     volumes:
       - ./data/redis:/data
     command: redis-server --appendonly yes  # 데이터 지속성을 위한 AOF 설정
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  influxdb:
+    image: influxdb:1.8
+    container_name: influxdb
+    networks:
+      - default
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=k6
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    networks:
+      - default
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_BASIC_ENABLED=false
+    volumes:
+      - ./grafana:/etc/grafana/provisioning/
+
+  k6:
+    image: grafana/k6:latest
+    container_name: k6
+    networks:
+      - default
+    ports:
+      - "6565:6565"
+    environment:
+      - K6_OUT=influxdb=http://influxdb:8086/k6
+    volumes:
+      - ./k6:/scripts
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+#    entrypoint: [ "k6", "run", "/scripts/coupon-test.js" ]
 
 networks:
   default:
     driver: bridge
+  kafka-net:
+    external: true
