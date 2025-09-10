@@ -63,44 +63,44 @@ services:
       timeout: 5s
       retries: 5
 
-  influxdb:
-    image: influxdb:1.8
-    container_name: influxdb
-    networks:
-      - default
-    ports:
-      - "8086:8086"
-    environment:
-      - INFLUXDB_DB=k6
+# influxdb:
+#   image: influxdb:1.8
+#   container_name: influxdb
+#   networks:
+#     - default
+#   ports:
+#     - "8086:8086"
+#   environment:
+#     - INFLUXDB_DB=k6
 
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    networks:
-      - default
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_BASIC_ENABLED=false
-    volumes:
-      - ./grafana:/etc/grafana/provisioning/
+# grafana:
+#   image: grafana/grafana:latest
+#   container_name: grafana
+#   networks:
+#     - default
+#   ports:
+#     - "3000:3000"
+#   environment:
+#     - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+#     - GF_AUTH_ANONYMOUS_ENABLED=true
+#     - GF_AUTH_BASIC_ENABLED=false
+#   volumes:
+#     - ./grafana:/etc/grafana/provisioning/
 
-  k6:
-    image: grafana/k6:latest
-    container_name: k6
-    networks:
-      - default
-    ports:
-      - "6565:6565"
-    environment:
-      - K6_OUT=influxdb=http://influxdb:8086/k6
-    volumes:
-      - ./k6:/scripts
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-#    entrypoint: [ "k6", "run", "/scripts/coupon-test.js" ]
+# k6:
+#   image: grafana/k6:latest
+#   container_name: k6
+#   networks:
+#     - default
+#   ports:
+#     - "6565:6565"
+#   environment:
+#     - K6_OUT=influxdb=http://influxdb:8086/k6
+#   volumes:
+#     - ./k6:/scripts
+#   extra_hosts:
+#     - "host.docker.internal:host-gateway"
+# #    entrypoint: [ "k6", "run", "/scripts/coupon-test.js" ]
 
 networks:
   default:
